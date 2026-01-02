@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import {
     Zap,
@@ -104,7 +104,7 @@ const CARD_TYPE_MAPPING = {
 const getCardFromType = (cardType) => {
     const cardConfig = CARD_TYPE_MAPPING[cardType];
     if (!cardConfig) return null;
-    
+
     return {
         ...cardConfig,
         id: cardType,
@@ -239,11 +239,11 @@ const BattleArena = ({ playerCard, opponentCard, battleResult, isWaiting, player
     const getResultMessage = () => {
         switch (battleResult) {
             case BATTLE_RESULTS.WIN:
-                return "✓ Anda Menang!";
+                return "Anda Menang!";
             case BATTLE_RESULTS.LOSE:
-                return "✗ Anda Kalah!";
+                return "Anda Kalah!";
             case BATTLE_RESULTS.DRAW:
-                return "~ Seri";
+                return "Seri";
             default:
                 return "";
         }
@@ -377,23 +377,24 @@ const MissingSessionState = () => (
     </div>
 );
 
-const GameOver = ({ playerScore, opponentScore, onRestart }) => {
-    const getWinnerMessage = () => {
-        if (playerScore > opponentScore) {
-            return <div className="text-green-400 text-xl font-bold">🎉 Anda Menang!</div>;
-        }
-        if (playerScore < opponentScore) {
-            return <div className="text-red-400 text-xl font-bold">Anda Kalah!</div>;
-        }
-        return <div className="text-yellow-400 text-xl font-bold">Seri!</div>;
-    };
+const GameEnded = () => {
+    const router = useRouter();
+
+    const handleExit = useCallback(() => {
+        // Remove game-related items from localStorage
+        localStorage.removeItem("gameStatus");
+        localStorage.removeItem("game_session_id");
+        localStorage.removeItem("game_sessions");
+
+        // Redirect to /rally
+        router.push("/rally");
+    }, [router]);
 
     return (
         <div className="mt-6 bg-gradient-to-r from-yellow-600/50 to-purple-600/50 border-2 border-yellow-500 rounded-lg p-8 text-center">
             <h2 className="text-3xl font-bold mb-4">Permainan Selesai!</h2>
-            {getWinnerMessage()}
-            <Button onClick={onRestart} className="mt-4">
-                Main Lagi
+            <Button onClick={handleExit} className="mt-4">
+                Keluar
             </Button>
         </div>
     );
@@ -425,7 +426,7 @@ export default function ViewGame() {
     const pollingTimeoutRef = useRef(null);
 
     // Fetch cards from API
-    const { data: cardsData, error: cardsError, isLoading: isLoadingCards } = useSWR(
+    const { data: cardsData, error: cardsError, isLoading: isLoadingCards, mutate: mutateCards } = useSWR(
         postId && gameSessionId ? ["battle-abn-getCard", postId, gameSessionId] : null,
         async () => {
             if (!postId || !gameSessionId) return null;
@@ -452,7 +453,13 @@ export default function ViewGame() {
 
     // Initialize player hand from API data
     useEffect(() => {
-        if (!cardsData) return;
+        if (!cardsData) {
+            // If cardsData is null or empty, set game phase to ENDED
+            if (!isLoadingCards && cardsData === null) {
+                setGamePhase(GAME_PHASES.ENDED);
+            }
+            return;
+        }
 
         const { playerCards, playerTeamId: teamId } = determinePlayerTeam(cardsData);
         setPlayerTeamId(teamId);
@@ -460,7 +467,7 @@ export default function ViewGame() {
         const hand = initializeHandFromAPI(playerCards);
         setPlayerHand(hand);
         setGamePhase(hand.length > 0 ? GAME_PHASES.PLAY : GAME_PHASES.ENDED);
-    }, [cardsData]);
+    }, [cardsData, isLoadingCards]);
 
     // Battle logic
     const opponentPlayCard = useCallback(() => {
@@ -537,7 +544,7 @@ export default function ViewGame() {
                 if (result1 !== undefined || result2 !== undefined) {
                     // Determine which result belongs to player
                     const isPlayerTim1 = (playerTeamId === tim1) || (cardsData?.tim1 && playerTeamId === cardsData.tim1);
-                    
+
                     // Update results based on player's team
                     if (isPlayerTim1) {
                         if (result1 !== undefined) setPlayerResult(result1);
@@ -573,33 +580,52 @@ export default function ViewGame() {
                         });
 
                         if (resultResponse?.data?.success && resultResponse?.data?.data) {
-                            const { result1, result2, tim1, tim2 } = resultResponse.data.data;
-                            
+                            const {
+                                result1,
+                                result2,
+                                card_tim1: cardTim1,
+                                card_tim2: cardTim2,
+                                tim1,
+                                tim2
+                            } = resultResponse.data.data;
+
                             // Determine which result belongs to player
-                            // Use cardsData to determine player team
                             const isPlayerTim1 = (playerTeamId === tim1) || (cardsData?.tim1 && playerTeamId === cardsData.tim1);
-                            
-                            // Update results based on player's team
+
+                            // Set opponent card based on which team is opponent
                             if (isPlayerTim1) {
-                                if (result1) {
-                                    setPlayerResult(result1);
+                                // Player is tim1, opponent is tim2
+                                const opponentCardObj = getCardFromType(cardTim2);
+                                if (opponentCardObj) {
+                                    setOpponentCard(opponentCardObj);
                                 }
-                                if (result2) {
-                                    setOpponentResult(result2);
-                                }
+                                // Set results
+                                setPlayerResult(result1);
+                                setOpponentResult(result2);
                             } else {
-                                if (result1) {
-                                    setOpponentResult(result1);
+                                // Player is tim2, opponent is tim1
+                                const opponentCardObj = getCardFromType(cardTim1);
+                                if (opponentCardObj) {
+                                    setOpponentCard(opponentCardObj);
                                 }
-                                if (result2) {
-                                    setPlayerResult(result2);
+                                // Set results
+                                setPlayerResult(result2);
+                                setOpponentResult(result1);
+                            }
+
+                            // Set battle result based on player result
+                            if (result1 && result2) {
+                                const playerFinalResult = isPlayerTim1 ? result1 : result2;
+                                if (playerFinalResult === "menang") {
+                                    setBattleResult(BATTLE_RESULTS.WIN);
+                                } else if (playerFinalResult === "kalah") {
+                                    setBattleResult(BATTLE_RESULTS.LOSE);
+                                } else if (playerFinalResult === "seri") {
+                                    setBattleResult(BATTLE_RESULTS.DRAW);
                                 }
                             }
-                            
-                            console.log("Results updated:", { result1, result2, tim1, tim2, isPlayerTim1, playerTeamId });
-                            
+
                             toast.success("Kedua kartu sudah dipilih! Battle dimulai.");
-                            // Continue with battle logic here if needed
                         } else {
                             toast.error("Gagal memproses hasil kartu.");
                         }
@@ -668,7 +694,7 @@ export default function ViewGame() {
         setSelectedCardForDialog(null);
     }, []);
 
-    const handleContinue = useCallback(() => {
+    const handleContinue = useCallback(async () => {
         // Reset battle state for next round
         setPlayerCard(null);
         setOpponentCard(null);
@@ -676,12 +702,38 @@ export default function ViewGame() {
         setOpponentResult(null);
         setBattleResult(null);
         setSelectedCard(null);
-        
-        // Re-enable card selection
-        setGamePhase(GAME_PHASES.PLAY);
-        
-        toast.info("Pilih kartu untuk ronde berikutnya");
-    }, []);
+
+        // Mutate getCard to check if cards are empty
+        try {
+            const updatedCardsData = await mutateCards();
+            
+            // Check if cardsData is empty or null
+            if (!updatedCardsData || (!updatedCardsData.card_tim1 && !updatedCardsData.card_tim2)) {
+                setGamePhase(GAME_PHASES.ENDED);
+                toast.info("Permainan selesai, tidak ada kartu tersisa");
+                return;
+            }
+
+            // Check player cards specifically
+            const { playerCards } = determinePlayerTeam(updatedCardsData);
+            const hand = initializeHandFromAPI(playerCards);
+            
+            if (hand.length === 0) {
+                setGamePhase(GAME_PHASES.ENDED);
+                toast.info("Permainan selesai, tidak ada kartu tersisa");
+                return;
+            }
+
+            // Re-enable card selection
+            setGamePhase(GAME_PHASES.PLAY);
+            toast.info("Pilih kartu untuk ronde berikutnya");
+        } catch (error) {
+            console.error("Error mutating cards:", error);
+            // Still allow to continue if mutate fails
+            setGamePhase(GAME_PHASES.PLAY);
+            toast.info("Pilih kartu untuk ronde berikutnya");
+        }
+    }, [mutateCards]);
 
     // Cleanup polling on unmount or restart
     useEffect(() => {
@@ -736,6 +788,17 @@ export default function ViewGame() {
         return <ErrorState onRetry={() => window.location.reload()} />;
     }
 
+    // If cardsData is null or empty after loading, show GameEnded
+    if (!cardsData || (!cardsData.card_tim1 && !cardsData.card_tim2)) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white p-4 md:p-6">
+                <div className="max-w-6xl mx-auto">
+                    <GameEnded />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white p-4 md:p-6">
             <div className="max-w-6xl mx-auto">
@@ -744,7 +807,7 @@ export default function ViewGame() {
                 </h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-3">
                         <BattleArena
                             playerCard={playerCard}
                             opponentCard={opponentCard}
@@ -759,7 +822,7 @@ export default function ViewGame() {
 
                 <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-6">
                     <h3 className="text-white font-bold mb-4">Tangan Anda</h3>
-                    <div className="flex flex-wrap gap-3 justify-center">
+                    <div className="grid grid-cols-4 gap-3">
                         {playerHand.length > 0 ? (
                             playerHand.map((card) => (
                                 <GameCard
@@ -771,17 +834,13 @@ export default function ViewGame() {
                                 />
                             ))
                         ) : (
-                            <div className="text-gray-400 py-8">Tidak ada kartu tersisa</div>
+                            <div className="text-gray-400 py-8 col-span-4 text-center">Tidak ada kartu tersisa</div>
                         )}
                     </div>
                 </div>
 
                 {gamePhase === GAME_PHASES.ENDED && (
-                    <GameOver
-                        playerScore={playerScore}
-                        opponentScore={opponentScore}
-                        onRestart={handleRestart}
-                    />
+                    <GameEnded />
                 )}
             </div>
 
