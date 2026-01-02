@@ -42,11 +42,9 @@ export default function HomepagePeserta() {
     const visibleImages = useMemo(() => {
         const result = [];
 
-        // Mobile: hanya tampilkan 1 gambar (active)
         if (isMobile) {
             result.push({ idx: active, src: images[active], isActive: true });
         } else {
-            // Desktop: tampilkan 3 gambar (prev, active, next)
             for (let i = -1; i <= 1; i++) {
                 const idx = (active + i + images.length) % images.length;
                 result.push({ idx, src: images[idx], isActive: i === 0 });
