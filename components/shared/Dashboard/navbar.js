@@ -192,7 +192,41 @@ const handleScroll = (e, href) => {
               {link.label}
             </Link>
           ))}
-          {}
+          {/* AUTH BUTTON */}
+          {!isMounted ? null : token ? (
+            <div className="pt-4 border-t border-teal-200 space-y-3">
+              <Button
+                className="w-full font-bold"
+                onClick={() => {
+                  router.push("/rally");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Rally
+              </Button>
+
+              <Button
+                variant="destructive"
+                className="w-full font-bold"
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Logout
+              </Button>
+            </div>
+          ) : (
+            !isAuthPage && (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-center bg-teal-800 hover:bg-teal-900 text-white py-3 rounded-full font-bold shadow-lg"
+              >
+                Login
+              </Link>
+            )
+          )}
         </div>
       )}
     </nav>
