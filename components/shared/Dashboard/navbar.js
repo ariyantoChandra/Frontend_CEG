@@ -111,8 +111,7 @@ const handleScroll = (e, href) => {
 
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/Asset/CEG HOMEPAGE.png" alt="CEG" width={40} height={40} />
-            <span className="text-xl font-black text-teal-900 uppercase tracking-tighter">CEG 2026</span>
+            <Image src="/Asset/CEG HOMEPAGE.png" alt="CEG" width={100} height={100} />
           </Link>
 
           {/* NAV LINKS */}
