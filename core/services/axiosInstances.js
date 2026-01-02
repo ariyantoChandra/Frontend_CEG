@@ -10,7 +10,7 @@ export const createAxiosInstance = (
     // (Port 5000 harus dipastikan terbuka di firewall server)
     
     // Opsi 1: Hardcode (Paling Cepat & Pasti Jalan)
-    const baseUrl = "https://api.cegubaya.com"; 
+    const baseUrl = "https://jagoan.cegubaya.com/"; 
     
     // Opsi 2: Kalau mau pakai .env (Pastikan di .env file isinya benar)
     // const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://103.163.138.117:5000";
