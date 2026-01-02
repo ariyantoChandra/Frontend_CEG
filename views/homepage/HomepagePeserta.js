@@ -167,7 +167,7 @@ export default function HomepagePeserta() {
                         <h3 className="text-2xl font-black text-teal-950 mb-2">Booklet Peserta</h3>
                         <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">Informasi mendalam mengenai pendaftaran dan aturan.</p>
                         <Button asChild className="w-full bg-[#58a644] hover:bg-[#4a8c39] py-7 rounded-2xl font-bold text-lg">
-                            <Link href="/Asset/GUIDELINE.pdf">Download Booklet</Link>
+                            <Link href="/Asset/GUIDELINE BOOK CEG 2026 (1).pdf">Download Booklet</Link>
                         </Button>
                     </div>
                     <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
@@ -175,7 +175,7 @@ export default function HomepagePeserta() {
                         <h3 className="text-2xl font-black text-teal-950 mb-2">SOP Lomba</h3>
                         <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">Panduan operasional selama hari-H kompetisi.</p>
                         <Button asChild className="w-full bg-[#1b8a86] hover:bg-[#156e6b] py-7 rounded-2xl font-bold text-lg">
-                            <Link href="/Asset/SOP.pdf">Download SOP</Link>
+                            <Link href="/Asset/Standart Operational Procedure Chemical Engineering Games 2026.pdf">Download SOP</Link>
                         </Button>
                     </div>
                 </div>
