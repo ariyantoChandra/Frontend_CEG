@@ -10,6 +10,8 @@ const images = [
     "/Asset/DSC00474.JPG",
 ];
 
+
+
 const faqData = [
     { id: 1, question: "Kapan pendaftaran terakhir?", answer: "Pendaftaran ditutup sesuai jadwal yang tertera di timeline." },
     { id: 2, question: "Apakah lomba ini tim atau individu?", answer: "Lomba ini bersifat tim sesuai ketentuan di booklet." },
