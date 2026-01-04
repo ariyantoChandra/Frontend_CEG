@@ -1,20 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  DndContext,
-  DragOverlay,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Sparkles, Trophy, RotateCcw, CheckCircle2 } from "lucide-react";
+import useSWR from "swr";
 
-// UI Components (Import path tetap sama karena alias @)
+// UI Components
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,235 +16,339 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-// Local Imports (Path relatif aman karena kita pindahkan file-file ini satu folder yang sama)
-import { ITEMS, SLOTS, SCENARIO_TEXT } from "./constants";
-import DraggableItem from "./_components/DraggableItem";
-import DroppableSlot from "./_components/DroppableSlot";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import * as API from "@/core/services/api";
 import FlowConnector from "./_components/FlowConnector";
 
+// Helper function to get game_session_id
+const getGameSessionId = () => {
+  try {
+    const gameData = localStorage.getItem("game_data");
+    if (!gameData) return null;
+
+    try {
+      const parsed = JSON.parse(gameData);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed.game_session_id || null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  } catch (err) {
+    console.error("Error reading game_data:", err);
+    return null;
+  }
+};
+
 export default function ViewGame() {
-  // Ganti nama function jadi ViewGame
   const router = useRouter();
+  const gameSessionId = getGameSessionId();
 
   // State Management
-  const [placements, setPlacements] = useState({
-    slot1: null,
-    slot2: null,
-    slot3: null,
-    slot4: null,
-    slot5: null,
-    slot6: null,
-  });
-
-  const [availableItems, setAvailableItems] = useState(
-    ITEMS.map((item) => item.id)
-  );
-  const [activeId, setActiveId] = useState(null);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [placements, setPlacements] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(null);
+  const [randomizedQuestions, setRandomizedQuestions] = useState(null);
 
-  // Sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  // Fetch data from API
+  const { data, error, isLoading } = useSWR(
+    gameSessionId ? ["sort-the-process-items", gameSessionId] : null,
+    async () => {
+      if (!gameSessionId) return null;
+      try {
+        const response = await API.sortTheProcess.getItemsQuestion({
+          game_session_id: gameSessionId,
+        });
+        return response?.data?.data || null;
+      } catch (err) {
+        console.error("Error fetching items:", err);
+        throw err;
+      }
+    }
   );
 
-  // --- LOGIC HANDLERS (DragStart, DragEnd, Submit, Reset) ---
-  // (Paste logic yang sama persis dari codingan sebelumnya di sini)
+  // Randomize questions on first load only
+  useEffect(() => {
+    if (data?.questions && !randomizedQuestions) {
+      const shuffled = [...data.questions].sort(() => Math.random() - 0.5);
+      setRandomizedQuestions(shuffled);
+      // Set first question as default
+      if (shuffled.length > 0) {
+        setSelectedQuestion(shuffled[0]);
+      }
+    }
+  }, [data, randomizedQuestions]);
 
-  const handleDragStart = (event) => {
-    setActiveId(event.active.id);
+  // Initialize placements based on selected question
+  useEffect(() => {
+    if (selectedQuestion) {
+      const initialPlacements = {};
+      for (let i = 1; i <= selectedQuestion.kotak; i++) {
+        initialPlacements[`slot${i}`] = null;
+      }
+      setPlacements(initialPlacements);
+      setShowResults(false);
+      setScore(null);
+    }
+  }, [selectedQuestion]);
+
+  // Get slots based on selected question
+  const slots = useMemo(() => {
+    if (!selectedQuestion) return [];
+    const slotsArray = [];
+    for (let i = 1; i <= selectedQuestion.kotak; i++) {
+      slotsArray.push({
+        id: `slot${i}`,
+        label: `Alat ${i}`,
+      });
+    }
+    return slotsArray;
+  }, [selectedQuestion]);
+
+  const handleItemClick = (itemId, slotId) => {
+    // Place item in selected slot (item can be used in multiple slots)
+    setPlacements((prev) => ({ ...prev, [slotId]: itemId }));
   };
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (!over) {
-      setActiveId(null);
-      return;
-    }
+  const handleRemoveItem = (slotId) => {
+    setPlacements((prev) => ({ ...prev, [slotId]: null }));
+  };
 
-    if (over.id.startsWith("slot")) {
-      const slotId = over.id;
-      const itemId = active.id;
+  const handleSubmit = async () => {
+    if (!selectedQuestion || !gameSessionId) return;
 
-      const currentSlot = Object.keys(placements).find(
-        (key) => placements[key] === itemId
-      );
+    // Build answer array based on placements
+    const answers = slots.map((slot, index) => ({
+      slot: index + 1,
+      item_id: placements[slot.id] || null,
+    }));
 
-      if (currentSlot) {
-        setPlacements((prev) => ({ ...prev, [currentSlot]: null }));
+    try {
+      const response = await API.sortTheProcess.postResult({
+        game_session_id: gameSessionId,
+        question_id: selectedQuestion.id,
+        answers: answers,
+      });
+
+      if (response?.data?.success) {
+        const resultData = response.data.data;
+        setScore(resultData.score || 0);
+        setShowResults(true);
+        toast.success("Jawaban berhasil dikirim!");
       } else {
-        setAvailableItems((prev) => prev.filter((id) => id !== itemId));
+        throw new Error("Gagal mengirim jawaban");
       }
-
-      if (placements[slotId]) {
-        setAvailableItems((prev) => [...prev, placements[slotId]]);
-      }
-
-      setPlacements((prev) => ({ ...prev, [slotId]: itemId }));
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Gagal mengirim jawaban");
+      console.error("Error submitting:", err);
     }
-    setActiveId(null);
-  };
-
-  const handleSubmit = () => {
-    let correctCount = 0;
-    SLOTS.forEach((slot) => {
-      if (placements[slot.id] === slot.correctAnswer) correctCount++;
-    });
-    setScore(Math.round((correctCount / SLOTS.length) * 100));
-    setShowResults(true);
   };
 
   const handleReset = () => {
-    setPlacements({
-      slot1: null,
-      slot2: null,
-      slot3: null,
-      slot4: null,
-      slot5: null,
-      slot6: null,
-    });
-    setAvailableItems(ITEMS.map((item) => item.id));
-    setShowResults(false);
-    setScore(null);
+    if (selectedQuestion) {
+      const initialPlacements = {};
+      for (let i = 1; i <= selectedQuestion.kotak; i++) {
+        initialPlacements[`slot${i}`] = null;
+      }
+      setPlacements(initialPlacements);
+      setShowResults(false);
+      setScore(null);
+    }
   };
 
-  const allSlotsFilled = Object.values(placements).every(
-    (item) => item !== null
-  );
+  const allSlotsFilled = slots.every((slot) => placements[slot.id] !== null);
 
-  // --- RETURN JSX ---
+  // Get item by ID
+  const getItemById = (itemId) => {
+    return data?.items?.find((item) => item.id === itemId);
+  };
+
+  if (!gameSessionId) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Alert className="border-red-500/50 bg-red-500/10 text-red-400">
+          <AlertDescription>
+            Game session tidak ditemukan. Silakan kembali ke waiting list.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <Sparkles className="mx-auto h-12 w-12 animate-pulse text-cyan-400" />
+          <p className="mt-4 text-zinc-400">Memuat data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Alert className="border-red-500/50 bg-red-500/10 text-red-400">
+          <AlertDescription>
+            Gagal memuat data. Silakan coba lagi.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="relative min-h-screen overflow-hidden px-4 py-12">
-        {/* Background & Header */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900"></div>
+    <div className="relative min-h-screen overflow-hidden px-4 py-12">
+      {/* Background & Header */}
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900"></div>
 
-        <div className="relative z-10 mx-auto max-w-7xl">
-          {/* Header Content */}
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-white">Sort the Process</h1>
-            <p className="text-zinc-400">Susun proses produksi dengan benar</p>
-          </div>
+      <div className="relative z-10 mx-auto max-w-7xl">
+        {/* Header Content */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-white">Sort the Process</h1>
+          <p className="text-zinc-400">Susun proses produksi dengan benar</p>
+        </div>
 
-          {/* Scenario */}
-          <Card className="mb-8 border-white/10 bg-zinc-900/40 backdrop-blur-xl">
+        {/* Question Selector */}
+        {randomizedQuestions && randomizedQuestions.length > 1 && (
+          <Card className="mb-6 border-white/10 bg-zinc-900/40 backdrop-blur-xl">
             <CardContent className="pt-6">
-              <p className="text-white">{SCENARIO_TEXT}</p>
-            </CardContent>
-          </Card>
-
-          {/* Score Alert */}
-          {showResults && (
-            <Alert className="mb-6 border-emerald-500/50 bg-emerald-500/10 text-emerald-400">
-              <Trophy className="h-4 w-4" />
-              <AlertDescription>Skor Anda: {score}/100</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Main Game Area */}
-          <Card className="mb-8 border-white/10 bg-zinc-900/40 backdrop-blur-xl">
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                {/* Row 1 */}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <DroppableSlot
-                    slot={SLOTS[0]}
-                    placedItem={placements.slot1}
-                    isCorrect={placements.slot1 === SLOTS[0].correctAnswer}
-                    showResults={showResults}
-                  />
-                  <DroppableSlot
-                    slot={SLOTS[1]}
-                    placedItem={placements.slot2}
-                    isCorrect={placements.slot2 === SLOTS[1].correctAnswer}
-                    showResults={showResults}
-                  />
-                </div>
-                <FlowConnector direction="down" />
-                {/* Row 2 */}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <DroppableSlot
-                    slot={SLOTS[2]}
-                    placedItem={placements.slot3}
-                    isCorrect={placements.slot3 === SLOTS[2].correctAnswer}
-                    showResults={showResults}
-                  />
-                  <DroppableSlot
-                    slot={SLOTS[3]}
-                    placedItem={placements.slot4}
-                    isCorrect={placements.slot4 === SLOTS[3].correctAnswer}
-                    showResults={showResults}
-                  />
-                </div>
-                <FlowConnector direction="down" />
-                {/* Row 3 */}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div></div>
-                  <DroppableSlot
-                    slot={SLOTS[4]}
-                    placedItem={placements.slot5}
-                    isCorrect={placements.slot5 === SLOTS[4].correctAnswer}
-                    showResults={showResults}
-                  />
-                </div>
-                <FlowConnector direction="down" />
-                {/* Row 4 */}
-                <div className="flex justify-center">
-                  <div className="w-full md:w-1/2">
-                    <DroppableSlot
-                      slot={SLOTS[5]}
-                      placedItem={placements.slot6}
-                      isCorrect={placements.slot6 === SLOTS[5].correctAnswer}
-                      showResults={showResults}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Inventory */}
-          <Card className="sticky bottom-4 border-white/10 bg-zinc-900/80 backdrop-blur-xl">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-4 gap-4">
-                {availableItems.map((id) => (
-                  <DraggableItem
-                    key={id}
-                    item={ITEMS.find((i) => i.id === id)}
-                    isDragging={activeId === id}
-                  />
+              <div className="flex flex-wrap gap-2">
+                {randomizedQuestions.map((question, index) => (
+                  <Button
+                    key={question.id}
+                    variant={selectedQuestion?.id === question.id ? "default" : "outline"}
+                    onClick={() => setSelectedQuestion(question)}
+                    className="text-sm"
+                  >
+                    Soal {index + 1}
+                  </Button>
                 ))}
               </div>
             </CardContent>
           </Card>
+        )}
 
-          {/* Buttons */}
-          <div className="mt-6 flex justify-center space-x-4">
-            <Button onClick={handleReset} variant="outline">
-              Reset
-            </Button>
-            <Button onClick={handleSubmit} disabled={!allSlotsFilled}>
-              Selesai
-            </Button>
-          </div>
+        {/* Scenario */}
+        {selectedQuestion && (
+          <Card className="mb-8 border-white/10 bg-zinc-900/40 backdrop-blur-xl">
+            <CardContent className="pt-6">
+              <p className="text-white">{selectedQuestion.name}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Score Alert */}
+        {showResults && score !== null && (
+          <Alert className="mb-6 border-emerald-500/50 bg-emerald-500/10 text-emerald-400">
+            <Trophy className="h-4 w-4" />
+            <AlertDescription>Skor Anda: {score}/100</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Main Game Area */}
+        {selectedQuestion && (
+          <Card className="mb-8 border-white/10 bg-zinc-900/40 backdrop-blur-xl">
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                {/* Render slots based on kotak value */}
+                {slots.map((slot, index) => {
+                  const isLast = index === slots.length - 1;
+                  const placedItemId = placements[slot.id];
+                  const placedItem = placedItemId ? getItemById(placedItemId) : null;
+
+                  return (
+                    <div key={slot.id}>
+                      <div className="flex items-center justify-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="relative flex min-h-[140px] w-full max-w-md flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/20 bg-zinc-900/30 p-4 transition-all hover:border-cyan-500/50 hover:bg-zinc-900/50">
+                              {/* Slot Label */}
+                              <div className="absolute -top-3 left-3 rounded-full border border-white/10 bg-zinc-900 px-3 py-1">
+                                <span className="text-xs font-medium text-cyan-400">
+                                  {slot.label}
+                                </span>
+                              </div>
+
+                              {/* Remove Button */}
+                              {placedItem && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveItem(slot.id);
+                                  }}
+                                  className="absolute -top-3 right-3 rounded-full bg-red-500/20 p-1 text-red-400 hover:bg-red-500/30"
+                                >
+                                  <span className="text-xs">×</span>
+                                </button>
+                              )}
+
+                              {/* Content */}
+                              {placedItem ? (
+                                <div className="flex flex-col items-center space-y-2">
+                                  <div className="rounded-full bg-cyan-500/20 p-3">
+                                    <span className="text-2xl">🔧</span>
+                                  </div>
+                                  <span className="text-sm font-semibold text-white">
+                                    {placedItem.name}
+                                  </span>
+                                  <span className="text-xs text-zinc-400">Klik untuk mengganti</span>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center space-y-2 text-zinc-500">
+                                  <div className="rounded-full border-2 border-dashed border-zinc-700 p-3">
+                                    <div className="h-8 w-8" />
+                                  </div>
+                                  <span className="text-xs">Klik untuk memilih alat</span>
+                                </div>
+                              )}
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="center" className="w-56">
+                            {data?.items?.map((item) => (
+                              <DropdownMenuItem
+                                key={item.id}
+                                onClick={() => handleItemClick(item.id, slot.id)}
+                              >
+                                {item.name}
+                                {placedItemId === item.id && (
+                                  <CheckCircle2 className="ml-auto h-4 w-4" />
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      {!isLast && <FlowConnector direction="down" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Buttons */}
+        <div className="mt-6 flex justify-center space-x-4">
+          <Button onClick={handleReset} variant="outline">
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
+          <Button onClick={handleSubmit} disabled={!allSlotsFilled || !selectedQuestion}>
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Selesai
+          </Button>
         </div>
       </div>
-
-      <DragOverlay>
-        {activeId ? (
-          <DraggableItem
-            item={ITEMS.find((i) => i.id === activeId)}
-            isDragging={false}
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+    </div>
   );
 }

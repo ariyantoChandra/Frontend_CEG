@@ -83,3 +83,11 @@ export const admin = {
     );
   },
 };
+
+export const sortTheProcess = {
+  getItemsQuestion: (data) =>
+    handleRequest(axiosInstance.post("/api/user/sort/get-sort-items", data)),
+
+  postResult: (data) =>
+    handleRequest(axiosInstance.post("/api/user/sort/get-sort-answer", data)),
+};
