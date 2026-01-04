@@ -10,7 +10,8 @@ export const extractTeamsData = (teamsArray) => {
         return { posType: DEFAULT_POS_TYPE, posName: DEFAULT_POS_NAME, teams: [] };
     }
 
-    const posType = teamsArray[0]?.type || DEFAULT_POS_TYPE;
+    // Coba ambil tipe dari field 'type' atau 'tipe' (karena API bisa menggunakan salah satunya)
+    const posType = teamsArray[0]?.type || teamsArray[0]?.tipe || DEFAULT_POS_TYPE;
     const posName = teamsArray[0]?.name_pos || DEFAULT_POS_NAME;
 
     return {

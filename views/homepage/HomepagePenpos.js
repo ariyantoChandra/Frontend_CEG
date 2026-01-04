@@ -10,8 +10,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, AlertCircle, ArrowRight } from "lucide-react";
+import { Users, ArrowRight } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/core/store/hooks";
 import { logout, setUserPenpos } from "@/core/feature/user/userSlice";
 import { penpos } from "@/core/services/api";
@@ -29,7 +28,6 @@ export default function HomePagePenpos() {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const userPenpos = useAppSelector((state) => state.user.userPenpos);
-    console.log("User Penpos from Redux:", userPenpos);
 
     const { data: responseGetPos } = useSWR(["getPos"], () => penpos.getPos());
     const { data: teamsResponse, error: teamsError, isLoading: isLoadingTeams } = useSWR(
@@ -86,6 +84,8 @@ export default function HomePagePenpos() {
             }
 
             localStorage.setItem("selectedTeams", JSON.stringify(selectedTeams));
+            localStorage.setItem("game_sessions_id", response?.data?.data?.id);
+            localStorage.setItem("pos_type", posInfo.type);
             toast.success("Battle dimulai! Mengarahkan ke halaman result...");
 
             setTimeout(() => {
@@ -101,7 +101,6 @@ export default function HomePagePenpos() {
 
     useEffect(() => {
         const posData = extractPosData(responseGetPos);
-        console.log("Extracted Pos Data:", responseGetPos);
         if (posData) {
             dispatch(setUserPenpos(posData.id));
             setPosInfo({
@@ -109,6 +108,7 @@ export default function HomePagePenpos() {
                 name: posData.name,
                 type: posData.type,
             });
+            localStorage.setItem("pos_type", posData.type);
         }
     }, [responseGetPos, dispatch]);
 

@@ -2,18 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useAppSelector } from "@/core/store/hooks";
 import { penpos } from "@/core/services/api";
 import useSWR from "swr";
 import { toast } from "sonner";
 import {
     extractTeamsData,
-    buildSubmitPayload,
     DEFAULT_POS_TYPE,
     DEFAULT_POS_NAME,
-    SUBMIT_DELAY,
     REDIRECT_DELAY,
 } from "@/components/shared/penpos/utils";
 import LoadingState from "@/components/shared/penpos/LoadingState";
@@ -37,18 +33,31 @@ export default function PostResultPage() {
         team1: { teamId: null, teamName: "", status: "" },
         team2: { teamId: null, teamName: "", status: "" },
     });
-    const [posInfo, setPosInfo] = useState({ type: DEFAULT_POS_TYPE, name: DEFAULT_POS_NAME });
+    const getInitialPosType = () => {
+        const storedPosType = localStorage.getItem("pos_type");
+        return storedPosType || DEFAULT_POS_TYPE;
+    };
+
+    const [posInfo, setPosInfo] = useState({ type: getInitialPosType(), name: DEFAULT_POS_NAME });
     const [submitting, setSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        const storedPosType = localStorage.getItem("pos_type");
+
         if (currentTeamsData?.data?.data) {
             const teamsArray = currentTeamsData.data.data;
             const { posType, posName, team1, team2 } = extractTeamsData(teamsArray);
 
-            setPosInfo({ type: posType, name: posName });
+            const finalPosType = storedPosType || posType || DEFAULT_POS_TYPE;
+
+            setPosInfo({ type: finalPosType, name: posName });
             setGameResults({ team1, team2 });
+        } else {
+            if (storedPosType) {
+                setPosInfo((prev) => ({ ...prev, type: storedPosType }));
+            }
         }
     }, [currentTeamsData]);
 
@@ -67,7 +76,9 @@ export default function PostResultPage() {
     };
 
     const isValid = () => {
-        if (posInfo.type === "SINGLE") {
+        const posType = localStorage.getItem("pos_type") || posInfo.type || DEFAULT_POS_TYPE;
+
+        if (posType === "SINGLE") {
             return gameResults.team1.status !== "";
         }
         return gameResults.team1.status !== "" && gameResults.team2?.status !== "";
@@ -78,26 +89,74 @@ export default function PostResultPage() {
             setSubmitting(true);
             setError(null);
 
-            const payload = buildSubmitPayload(userPenpos, posInfo.type, gameResults);
-            console.log("Mengirim hasil ke Backend:", payload);
+            const gameSessionId = localStorage.getItem("game_sessions_id");
+            if (!gameSessionId) {
+                throw new Error("Game session ID tidak ditemukan. Silakan mulai game terlebih dahulu.");
+            }
 
-            // TODO: Ganti dengan endpoint submit hasil yang sebenarnya
-            // const response = await penpos.submitResults(payload);
+            let resultPayload;
 
-            // Mock success
-            await new Promise((resolve) => setTimeout(resolve, SUBMIT_DELAY));
+            const storedPosType = localStorage.getItem("pos_type");
+            const posType = storedPosType || posInfo.type || "BATTLE";
+
+            if (posType === "SINGLE") {
+                if (gameResults.team1.status === "") {
+                    throw new Error("Status tim harus diisi");
+                }
+
+                const result = gameResults.team1.status === "WIN";
+                resultPayload = {
+                    game_session_id: parseInt(gameSessionId),
+                    result: result,
+                    tim_id: gameResults.team1.teamId,
+                };
+            } else {
+                const team1Status = gameResults.team1.status;
+                const team2Status = gameResults.team2?.status;
+
+                if (team1Status === "" || team2Status === "") {
+                    throw new Error("Status kedua tim harus diisi");
+                }
+
+                let tim_menang, tim_kalah;
+
+                if (team1Status === "WIN" && team2Status === "LOSE") {
+                    tim_menang = gameResults.team1.teamId;
+                    tim_kalah = gameResults.team2.teamId;
+                } else if (team1Status === "LOSE" && team2Status === "WIN") {
+                    tim_menang = gameResults.team2.teamId;
+                    tim_kalah = gameResults.team1.teamId;
+                } else {
+                    throw new Error("Salah satu tim harus menang dan tim lainnya harus kalah");
+                }
+
+                resultPayload = {
+                    game_session_id: parseInt(gameSessionId),
+                    tim_menang: tim_menang,
+                    tim_kalah: tim_kalah,
+                };
+            }
+
+            const response = await penpos.resultMatch(resultPayload);
+
+            if (!response?.data) {
+                throw new Error("Gagal menyimpan hasil");
+            }
 
             setSubmitSuccess(true);
-            toast.success("Hasil berhasil disimpan!");
+            toast.success(response?.data?.message || "Hasil berhasil disimpan!");
+
+            localStorage.removeItem("game_sessions_id");
+            localStorage.removeItem("pos_type");
+            localStorage.removeItem("selectedTeams")
 
             setTimeout(() => {
                 router.push("/pos");
             }, REDIRECT_DELAY);
         } catch (err) {
-            const errorMsg = err?.response?.data?.message || "Gagal menyimpan hasil. Silakan coba lagi.";
+            const errorMsg = err?.response?.data?.message || err?.message || "Gagal menyimpan hasil. Silakan coba lagi.";
             setError(errorMsg);
             toast.error(errorMsg);
-            console.error("Error submitting results:", err);
         } finally {
             setSubmitting(false);
         }
@@ -122,7 +181,7 @@ export default function PostResultPage() {
 
                 <div className="space-y-6">
                     <TeamCardsSection
-                        posType={posInfo.type}
+                        posType={localStorage.getItem("pos_type") || posInfo.type || DEFAULT_POS_TYPE}
                         gameResults={gameResults}
                         submitting={submitting}
                         onTeam1StatusChange={handleTeam1StatusChange}

@@ -25,6 +25,9 @@ export const penpos = {
 
   startBattle: (data) =>
     handleRequest(axiosInstance.post("/api/penpos/create-game-session", data)),
+
+  resultMatch: (data) =>
+    handleRequest(axiosInstance.post("/api/penpos/match-result", data)),
 };
 
 export const pos = {
