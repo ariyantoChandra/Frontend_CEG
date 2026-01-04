@@ -29,7 +29,13 @@ export default function Navbar() {
 
   const token = useAppSelector((state) => state.token.token);
   const user = useAppSelector((state) => state.user.user);
-  const role = localStorage.getItem("role");
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setRole(localStorage.getItem("role"));
+    }
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);

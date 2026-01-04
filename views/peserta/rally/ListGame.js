@@ -168,7 +168,9 @@ export default function ListGame() {
                             const typeStyles = getTypeStyles(post.tipe);
                             const { isBattle, typeGlow, iconColor, typeBorder, gradientFrom, hoverBg } =
                                 typeStyles;
-                            const { interactive } = statusConfig;
+                            const { interactive: statusInteractive } = statusConfig;
+                            const isPlayed = post.isPlayed === true;
+                            const interactive = statusInteractive && !isPlayed;
 
                             return (
                                 <Card
@@ -182,6 +184,14 @@ export default function ListGame() {
                                     <div
                                         className={`absolute inset-0 bg-gradient-to-br ${gradientFrom} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                                     />
+
+                                    {isPlayed && (
+                                        <div className="absolute inset-0 flex items-center justify-center z-30 bg-zinc-900/10 backdrop-blur-sm">
+                                            <p className="text-center text-zinc-300 font-medium px-4">
+                                                Kamu sudah memainkan game ini
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                                         <Badge
