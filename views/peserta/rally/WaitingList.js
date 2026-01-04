@@ -7,10 +7,8 @@ import {
     Users,
     RefreshCw,
     Clock,
-    CheckCircle,
     AlertCircle,
     Play,
-    DoorClosed,
     LogOut,
     Info,
 } from "lucide-react";
@@ -30,9 +28,6 @@ import {
 import { toast } from "sonner";
 import * as API from "@/core/services/api";
 
-
-
-// Empty State Component
 const EmptyState = ({ isLoading, error }) => {
     if (isLoading) {
         return (
@@ -65,8 +60,6 @@ export default function WaitingListView() {
     const router = useRouter();
     const currentPostId = params?.id;
     const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
-    const [selectedTeams, setSelectedTeams] = useState([]);
-    const [isStartingBattle, setIsStartingBattle] = useState(false);
 
     const { data, error, isLoading, mutate } = useSWR(
         currentPostId ? ["waiting-list", currentPostId] : null,
@@ -98,8 +91,14 @@ export default function WaitingListView() {
                     const gameData = response.data.data;
 
                     localStorage.setItem("game_data", JSON.stringify(gameData));
+                    
+                    localStorage.setItem("gameStatus", JSON.stringify({
+                        status: "battle",
+                        postId: currentPostId,
+                        timestamp: new Date().getTime()
+                    }));
 
-                    router.push(`/rally/${currentPostId}/battle-abn`);
+                    router.push(`/rally/${currentPostId}/${gameData.nama_game}`);
                 }
 
                 return response?.data?.data || null;
@@ -114,14 +113,29 @@ export default function WaitingListView() {
         }
     );
 
-    // Set localStorage status when entering waiting list
     useEffect(() => {
         if (currentPostId) {
-            localStorage.setItem("gameStatus", JSON.stringify({
-                status: "waiting",
-                postId: currentPostId,
-                timestamp: new Date().getTime()
-            }));
+            const currentGameStatus = localStorage.getItem("gameStatus");
+            let shouldSetWaiting = true;
+
+            if (currentGameStatus) {
+                try {
+                    const parsed = JSON.parse(currentGameStatus);
+                    if (parsed.status === "battle" && parsed.postId === currentPostId) {
+                        shouldSetWaiting = false;
+                    }
+                } catch (e) {
+                    // Jika parsing gagal, lanjutkan set waiting
+                }
+            }
+
+            if (shouldSetWaiting) {
+                localStorage.setItem("gameStatus", JSON.stringify({
+                    status: "waiting",
+                    postId: currentPostId,
+                    timestamp: new Date().getTime()
+                }));
+            }
         }
     }, [currentPostId]);
 
@@ -152,51 +166,6 @@ export default function WaitingListView() {
                 error: "Gagal keluar dari permainan. Silakan coba lagi.",
             }
         );
-    };
-
-    const handleSelectTeam = (teamId) => {
-        setSelectedTeams((prev) => {
-            if (prev.includes(teamId)) {
-                return prev.filter((id) => id !== teamId);
-            } else {
-                if (prev.length < 2) {
-                    return [...prev, teamId];
-                }
-                return prev;
-            }
-        });
-    };
-
-    const handleStartBattle = async () => {
-        if (selectedTeams.length !== 2) {
-            toast.error("Silakan pilih 2 tim terlebih dahulu");
-            return;
-        }
-
-        setIsStartingBattle(true);
-        toast.promise(
-            API.penpos.startBattle({
-                tim1: selectedTeams[0],
-                tim2: selectedTeams[1],
-            }).then((response) => {
-                if (response?.data) {
-                    setSelectedTeams([]);
-                    localStorage.setItem("gameStatus", JSON.stringify({
-                        status: "battle",
-                        postId: currentPostId,
-                        timestamp: new Date().getTime()
-                    }));
-                    setTimeout(() => router.push(`/rally/${currentPostId}/battle-abn`), 1000);
-                } else {
-                    throw new Error("Gagal memulai battle");
-                }
-            }),
-            {
-                loading: "Sedang memulai battle...",
-                success: "Battle dimulai!",
-                error: "Gagal memulai battle. Silakan coba lagi.",
-            }
-        ).finally(() => setIsStartingBattle(false));
     };
 
     const teamsData = Array.isArray(data) ? data : [];
