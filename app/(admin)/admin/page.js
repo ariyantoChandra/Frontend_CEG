@@ -64,7 +64,7 @@ export default function AdminDashboard() {
             <Search className="absolute left-3 top-3 text-gray-400" size={20} />
             <Input
               placeholder="Cari nama tim..."
-              className="pl-10 bg-white"
+              className="pl-10 bg-white text-black"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

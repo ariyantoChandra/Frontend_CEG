@@ -73,7 +73,7 @@ export default function TeamDetailPage() {
     <div className="min-h-screen bg-gray-50 p-6 md:p-10">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Tombol Back */}
-        <Button variant="ghost" onClick={() => router.back()} className="gap-2">
+        <Button variant="ghost" onClick={() => router.back()} className="gap-2 text-black">
           <ArrowLeft size={20} /> Kembali ke Dashboard
         </Button>
 
@@ -85,11 +85,10 @@ export default function TeamDetailPage() {
             </h1>
             <p className="text-gray-500 font-medium">{data.asal_sekolah}</p>
             <div
-              className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold ${
-                data.status_pembayaran === "verified"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
+              className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold ${data.status_pembayaran === "verified"
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+                }`}
             >
               {data.status_pembayaran === "verified" ? (
                 <CheckCircle size={16} />
@@ -194,6 +193,15 @@ export default function TeamDetailPage() {
                     <p>Penyakit: {m.penyakit_bawaan}</p>
                   </div>
                   <div className="flex flex-col gap-2 pt-2">
+                    {m.pas_foto && (
+                      <a
+                        href={getImageUrl(m.pas_foto)}
+                        target="_blank"
+                        className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <ExternalLink size={12} /> Lihat Pas Foto
+                      </a>
+                    )}
                     {m.kartu_pelajar && (
                       <a
                         href={getImageUrl(m.kartu_pelajar)}
@@ -201,6 +209,24 @@ export default function TeamDetailPage() {
                         className="text-xs text-blue-600 hover:underline flex items-center gap-1"
                       >
                         <ExternalLink size={12} /> Lihat Kartu Pelajar
+                      </a>
+                    )}
+                    {m.bukti_follow_ceg && (
+                      <a
+                        href={getImageUrl(m.bukti_follow_ceg)}
+                        target="_blank"
+                        className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <ExternalLink size={12} /> Lihat Bukti Follow IG CEG
+                      </a>
+                    )}
+                    {m.bukti_follow_tkubaya && (
+                      <a
+                        href={getImageUrl(m.bukti_follow_tkubaya)}
+                        target="_blank"
+                        className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <ExternalLink size={12} /> Lihat Bukti Follow IG TKUBAYA
                       </a>
                     )}
                     {/* Tambahkan link follow jika perlu */}

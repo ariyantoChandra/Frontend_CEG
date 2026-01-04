@@ -29,49 +29,50 @@ export default function Navbar() {
 
   const token = useAppSelector((state) => state.token.token);
   const user = useAppSelector((state) => state.user.user);
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-  if (pathname !== "/") return;
+    if (pathname !== "/") return;
 
-  const sectionToNavMap = {
-    home: "home",
-    gallery: "home",
-    "competition-details": "home",
+    const sectionToNavMap = {
+      home: "home",
+      gallery: "home",
+      "competition-details": "home",
 
-    "pre-event": "pre-event",
-    resources: "pre-event",
+      "pre-event": "pre-event",
+      resources: "pre-event",
 
-    faq: "faq",
-    "CP&Partner": "faq",
-  };
+      faq: "faq",
+      "CP&Partner": "faq",
+    };
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const nav = sectionToNavMap[entry.target.id];
-          if (nav) setActiveNav(nav);
-        }
-      });
-    },
-    {
-      root: null,
-      rootMargin: "-40% 0px -40% 0px", // fokus tengah layar
-      threshold: 0,
-    }
-  );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const nav = sectionToNavMap[entry.target.id];
+            if (nav) setActiveNav(nav);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "-40% 0px -40% 0px", // fokus tengah layar
+        threshold: 0,
+      }
+    );
 
-  Object.keys(sectionToNavMap).forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
+    Object.keys(sectionToNavMap).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
 
-  return () => observer.disconnect();
-}, [pathname]);
+    return () => observer.disconnect();
+  }, [pathname]);
 
 
   const isAuthPage = pathname === "/login" || pathname === "/register";
@@ -88,20 +89,20 @@ export default function Navbar() {
     router.push("/");
   };
 
-const handleScroll = (e, href) => {
-  if (pathname !== "/") return;
-  e.preventDefault();
+  const handleScroll = (e, href) => {
+    if (pathname !== "/") return;
+    e.preventDefault();
 
-  const id = href.replace("#", "");
-  setActiveNav(id);
+    const id = href.replace("#", "");
+    setActiveNav(id);
 
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
-  }
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
 
-  setMobileMenuOpen(false);
-};
+    setMobileMenuOpen(false);
+  };
 
 
   return (
@@ -124,9 +125,8 @@ const handleScroll = (e, href) => {
                     key={link.id}
                     href={link.href}
                     onClick={(e) => handleScroll(e, link.href)}
-                    className={`relative font-bold transition-all duration-300 py-1 text-sm tracking-wide ${
-                      isActive ? "text-teal-800" : "text-teal-900/40 hover:text-teal-700"
-                    }`}
+                    className={`relative font-bold transition-all duration-300 py-1 text-sm tracking-wide ${isActive ? "text-teal-800" : "text-teal-900/40 hover:text-teal-700"
+                      }`}
                   >
                     {link.label}
                     {isActive && (
@@ -142,17 +142,26 @@ const handleScroll = (e, href) => {
           <div className="hidden md:flex items-center gap-4">
             {!isMounted ? null : token ? (
               <>
-                <Button variant="ghost" className="font-bold text-teal-900 hover:bg-white/40" onClick={() => router.push('/rally')}>
-                  Rally
-                </Button>
+                {role !== "ADMIN" && (
+                  <Button variant="ghost" className="font-bold text-teal-900 hover:bg-white/40" onClick={() => router.push('/rally')}>
+                    Rally
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-teal-800/30 text-teal-900 bg-white/40 rounded-full font-bold px-5">
-                        {user}
+                      {user}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 bg-white/95 backdrop-blur-md">
                     <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
+                    {role === "ADMIN" && (
+                      <DropdownMenuLabel onClick={() => router.push("admin")}
+                        className="cursor-pointer"
+                      >
+                        Dashboard
+                      </DropdownMenuLabel>
+                    )}
                     <DropdownMenuSeparator />
                     {/* PERBAIKAN DI SINI: Gunakan DropdownMenuItem bukan DropdownMenuMenuItem */}
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 font-bold cursor-pointer">
