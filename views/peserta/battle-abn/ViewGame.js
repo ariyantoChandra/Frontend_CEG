@@ -115,20 +115,20 @@ const getCardFromType = (cardType) => {
 // ==================== UTILITY FUNCTIONS ====================
 const getGameSessionId = () => {
     try {
-        const stored = localStorage.getItem("game_sessions");
-        if (!stored) return null;
+        const gameData = localStorage.getItem("game_data");
+        if (!gameData) return null;
 
         try {
-            const parsed = JSON.parse(stored);
+            const parsed = JSON.parse(gameData);
             if (typeof parsed === 'object' && parsed !== null) {
-                return parsed.game_session_id || parsed.id || parsed;
+                return parsed.game_session_id || null;
             }
-            return parsed;
+            return null;
         } catch {
-            return stored;
+            return null;
         }
     } catch (err) {
-        console.error("Error reading game_sessions:", err);
+        console.error("Error reading game_data:", err);
         return null;
     }
 };
@@ -385,6 +385,7 @@ const GameEnded = () => {
         localStorage.removeItem("gameStatus");
         localStorage.removeItem("game_session_id");
         localStorage.removeItem("game_sessions");
+        localStorage.removeItem("game_data");
 
         // Redirect to /rally
         router.push("/rally");

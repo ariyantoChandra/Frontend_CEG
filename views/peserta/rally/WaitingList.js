@@ -94,13 +94,13 @@ export default function WaitingListView() {
             try {
                 const response = await API.rally.checkAcc();
 
-                if (response?.data?.success === true) {
-                    const game_sessions = response?.data?.data;
-                    localStorage.setItem("game_sessions", game_sessions);
+                if (response?.data?.success === true && response?.data?.data) {
+                    const gameData = response.data.data;
+
+                    localStorage.setItem("game_data", JSON.stringify(gameData));
+
                     router.push(`/rally/${currentPostId}/battle-abn`);
                 }
-
-                localStorage.setItem("game_session_id", response?.data?.data);
 
                 return response?.data?.data || null;
             } catch (err) {
