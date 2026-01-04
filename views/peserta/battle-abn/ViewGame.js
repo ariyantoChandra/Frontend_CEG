@@ -575,8 +575,6 @@ export default function ViewGame() {
                     try {
                         const resultResponse = await API.battleAbn.resultSelectedCard({
                             game_session_id: String(gameSessionId),
-                            card1: card_tim1,
-                            card2: card_tim2,
                         });
 
                         if (resultResponse?.data?.success && resultResponse?.data?.data) {
