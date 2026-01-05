@@ -17,6 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
+import * as API from "@/core/services/api";
+import useSWR from "swr";
+import { Badge } from "@/components/ui/badge";
+
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -30,10 +34,12 @@ export default function Navbar() {
   const token = useAppSelector((state) => state.token.token);
   const user = useAppSelector((state) => state.user.user);
   const [role, setRole] = useState(null);
+  const [user_id, setUser_id] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setRole(localStorage.getItem("role"));
+      setUser_id(localStorage.getItem("user_id"));
     }
     setIsMounted(true);
   }, []);
@@ -88,6 +94,13 @@ export default function Navbar() {
   const handleLogout = () => {
     dispatch(clearToken());
     dispatch(logoutUser());
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("role");
+    // Delete cookies
+    if (typeof document !== "undefined") {
+      document.cookie = "token=; path=/; max-age=0";
+      document.cookie = "settings=; path=/; max-age=0";
+    }
     router.push("/");
   };
 
@@ -106,6 +119,18 @@ export default function Navbar() {
     // Jika di halaman lain, Link akan menangani navigasi secara default ke '/'
     setMobileMenuOpen(false);
   };
+
+  const { data: statusPayment } = useSWR(
+    user_id ? ["get-status-payment", user_id] : null,
+    async () => {
+      const query = {
+        user_id: user_id,
+      };
+
+      const response = await API.user.getStatusPayment(query);
+      return response?.data?.data?.status_pembayaran || null;
+    }
+  );
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 w-full bg-white/20 backdrop-blur-md border-b border-white/30">
@@ -144,11 +169,11 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {!isMounted ? null : token ? (
               <>
-                {role !== "ADMIN" && (
+                {/* {role !== "ADMIN" && (
                   <Button variant="ghost" className="font-bold text-teal-900 hover:bg-white/40" onClick={() => router.push('/rally')}>
                     Rally
                   </Button>
-                )}
+                )} */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-teal-800/30 text-teal-900 bg-white/40 rounded-full font-bold px-5">
@@ -165,8 +190,12 @@ export default function Navbar() {
                     )}
 
                     {role !== "ADMIN" && (
-                      <DropdownMenuItem onClick={() => router.push("/dashboard")} className="cursor-pointer font-medium text-teal-900">
-                        Dashboard Tim
+                      <DropdownMenuItem>
+                        <Badge
+                          className={`rounded-none font-bold shadow-lg text-sm ${statusPayment === "unverified" ? "text-white bg-yellow-300" : statusPayment === "verified" ? "text-white bg-green-500" : "text-white bg-yellow-500"}`}
+                        >
+                          {statusPayment === "unverified" ? "Menunggu Terverifikasi" : statusPayment === "verified" ? "Terverifikasi" : "Menunggu Verifikasi"}
+                        </Badge>
                       </DropdownMenuItem>
                     )}
 
@@ -206,23 +235,19 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          
+
           {/* AUTH BUTTON MOBILE */}
           {!isMounted ? null : token ? (
             <div className="pt-4 border-t border-teal-200 space-y-3">
               {role !== "ADMIN" ? (
-                 <>
-                  <Button
-                    className="w-full font-bold bg-teal-800 text-white"
-                    onClick={() => {
-                      router.push("/dashboard");
-                      setMobileMenuOpen(false);
-                    }}
+                <>
+                  <Badge
+                    className={`py-2 rounded-none w-full font-bold shadow-lg text-sm ${statusPayment === "unverified" ? "text-white bg-yellow-300" : statusPayment === "verified" ? "text-white bg-green-500" : "text-white bg-yellow-500"}`}
                   >
-                    Dashboard Tim
-                  </Button>
-                  <Button
-                    variant="ghost" 
+                    {statusPayment === "unverified" ? "Menunggu Terverifikasi" : statusPayment === "verified" ? "Terverifikasi" : "Menunggu Verifikasi"}
+                  </Badge>
+                  {/* <Button
+                    variant="ghost"
                     className="w-full font-bold text-teal-900"
                     onClick={() => {
                       router.push("/rally");
@@ -230,18 +255,18 @@ export default function Navbar() {
                     }}
                   >
                     Rally
-                  </Button>
-                 </>
+                  </Button> */}
+                </>
               ) : (
-                  <Button
-                    className="w-full font-bold bg-teal-800 text-white"
-                    onClick={() => {
-                      router.push("/admin");
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Dashboard Admin
-                  </Button>
+                <Button
+                  className="w-full font-bold bg-teal-800 text-white"
+                  onClick={() => {
+                    router.push("/admin");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Dashboard Admin
+                </Button>
               )}
 
               <Button

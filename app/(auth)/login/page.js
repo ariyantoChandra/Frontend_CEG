@@ -46,6 +46,7 @@ export default function LoginPage() {
           dispatch(setToken({ token: access_token }));
           dispatch(setUser(username));
           dispatch(setRole(role));
+          localStorage.setItem("user_id", response?.data?.data?.id);
           toast.success(`Selamat datang, ${username || 'User'}!`);
           if (role === 'PESERTA') router.push('/');
           else if (role === 'ADMIN') router.push('/admin');

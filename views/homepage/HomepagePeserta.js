@@ -80,7 +80,7 @@ export default function HomepagePeserta() {
                 {/* ===== SECTION 1: HOME ===== */}
                 <section id="home" className="min-h-screen w-full flex flex-col items-center justify-center">
                     <div className="flex flex-col items-center text-center max-w-5xl">
-                        <div className="relative w-full max-w-2xl h-[200px] md:h-[180px] mt-24 mb-8 animate-in fade-in zoom-in duration-700">
+                        <div className="relative w-full max-w-2xl h-[200px] md:h-[180px] mb-8 animate-in fade-in zoom-in duration-700">
                             <Image
                                 src="/Asset/CEG HOMEPAGE.png"
                                 alt="Chemical Engineering Games 2026"
@@ -102,13 +102,9 @@ export default function HomepagePeserta() {
 
                         {/* LOGIKA TOMBOL: Jika Token Ada (Login) -> Dashboard, Jika Tidak -> Register */}
                         <div className="flex flex-col sm:flex-row gap-4">
-                            {!token ? (
+                            {!token && (
                                 <Button asChild className="bg-teal-800 hover:bg-teal-900 text-white px-12 py-7 rounded-full text-xl font-bold shadow-lg transition-transform hover:scale-105">
                                     <Link href="/register">Daftar Sekarang</Link>
-                                </Button>
-                            ) : (
-                                <Button asChild className="bg-teal-800 hover:bg-teal-900 text-white px-12 py-7 rounded-full text-xl font-bold shadow-lg transition-transform hover:scale-105">
-                                    <Link href="/dashboard">Ke Dashboard Tim</Link>
                                 </Button>
                             )}
                         </div>
@@ -172,17 +168,17 @@ export default function HomepagePeserta() {
                                 <p className="text-teal-950 font-bold mb-4 text-sm md:text-base uppercase italic">AGRINOVA: Agricultural Innovation for Sustainable Nutrition Advancement</p>
                                 <h3 className="font-black text-teal-800 text-xl mb-1">MASKOT</h3>
                                 <p className="text-teal-950 font-medium text-sm md:text-base leading-relaxed text-justify">
-                                    AGRINOVA menggambarkan sebuah ledakan inovasi yang lahir dari dunia 
-                                    pertanian sebagai respons terhadap tantangan pangan masa kini dan 
-                                    masa depan. Kata “Nova” berarti bintang baru, yang menjadi simbol 
-                                    munculnya gagasan, pendekatan, dan terobosan baru dalam menciptakan 
-                                    sistem pangan yang lebih sehat, efisien, dan ramah lingkungan. 
-                                    Melalui konsep ini, AGRINOVA merepresentasikan semangat pembaruan 
-                                    dan kreativitas dalam mengembangkan pertanian modern yang tidak hanya 
-                                    berorientasi pada hasil, tetapi juga pada keberlanjutan dan kualitas. 
-                                    AGRINOVA merupakan langkah transformasi dari pertanian tradisional 
-                                    menuju sistem pangan masa depan yang berbasis pada sains, teknologi, 
-                                    dan prinsip keberlanjutan, guna mendukung ketahanan pangan serta 
+                                    AGRINOVA menggambarkan sebuah ledakan inovasi yang lahir dari dunia
+                                    pertanian sebagai respons terhadap tantangan pangan masa kini dan
+                                    masa depan. Kata “Nova” berarti bintang baru, yang menjadi simbol
+                                    munculnya gagasan, pendekatan, dan terobosan baru dalam menciptakan
+                                    sistem pangan yang lebih sehat, efisien, dan ramah lingkungan.
+                                    Melalui konsep ini, AGRINOVA merepresentasikan semangat pembaruan
+                                    dan kreativitas dalam mengembangkan pertanian modern yang tidak hanya
+                                    berorientasi pada hasil, tetapi juga pada keberlanjutan dan kualitas.
+                                    AGRINOVA merupakan langkah transformasi dari pertanian tradisional
+                                    menuju sistem pangan masa depan yang berbasis pada sains, teknologi,
+                                    dan prinsip keberlanjutan, guna mendukung ketahanan pangan serta
                                     kesejahteraan generasi mendatang.
                                 </p>
                             </div>
@@ -290,7 +286,7 @@ export default function HomepagePeserta() {
                             loading="lazy"
                         />
                     </div>
-                    
+
                     {/* === TAMBAHAN PRICE LIST DI SINI === */}
                     <div className="flex flex-col md:flex-row gap-6 my-8 z-10 px-4 w-full justify-center">
                         <div className="bg-white/40 backdrop-blur-md border border-white/50 p-6 rounded-2xl text-center shadow-lg transform hover:scale-105 transition-transform w-full md:w-64">

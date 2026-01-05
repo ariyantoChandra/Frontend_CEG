@@ -6,13 +6,20 @@ const handleRequest = createHandleRequest();
 const axiosInstance = createAxiosInstance();
 
 export const auth = {
-  login: (data) => handleRequest(axiosnInstance.post("api/auth/login", data)),
+  login: (data) => handleRequest(axiosInstance.post("api/auth/login", data)),
 
   // FUNGSI REGISTER BARU
   register: (data) =>
     handleRequest(axiosInstance.post("/api/auth/register", data)),
   registerAdmin: (data) =>
     handleRequest(axiosInstance.post("/api/auth/register-admin", data)),
+};
+
+export const user = {
+  getStatusPayment: (user_id) =>
+    handleRequest(
+      axiosInstance.get("/api/user/check-status-pembayaran", { params: user_id })
+    ),
 };
 
 export const penpos = {

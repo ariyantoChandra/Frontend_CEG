@@ -6,6 +6,7 @@ import { Loader2, Search, CheckCircle, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -36,6 +37,15 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    cookieStore.delete("token");
+    cookieStore.delete("settings")
+    router.push("/login");
+  };
+
   // Filter pencarian sederhana
   const filteredTeams = teams.filter((t) =>
     t.nama_tim.toLowerCase().includes(search.toLowerCase())
@@ -60,14 +70,17 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-gray-500">Kelola pendaftaran tim CEG 2026</p>
           </div>
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <Input
-              placeholder="Cari nama tim..."
-              className="pl-10 bg-white text-black"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+              <Input
+                placeholder="Cari nama tim..."
+                className="pl-10 bg-white text-black"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleLogout}>Logout</Button>
           </div>
         </div>
 
@@ -77,7 +90,7 @@ export default function AdminDashboard() {
             <Card
               key={team.id}
               className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] border-t-4 border-t-teal-800"
-              onClick={() => router.push(`/admin/team/${team.user_id}`)}
+              onClick={() => router.push(`/admin/team/${team.id}`)}
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
