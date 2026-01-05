@@ -6,7 +6,7 @@ const handleRequest = createHandleRequest();
 const axiosInstance = createAxiosInstance();
 
 export const auth = {
-  login: (data) => handleRequest(axiosInstance.post("api/auth/login", data)),
+  login: (data) => handleRequest(axiosnInstance.post("api/auth/login", data)),
 
   // FUNGSI REGISTER BARU
   register: (data) =>

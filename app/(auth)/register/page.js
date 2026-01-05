@@ -21,8 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Navbar from "@/components/shared/Dashboard/navbar";
-
-// IMPORT API SERVICE
 import { auth } from "@/core/services/api";
 
 const inputClass =
@@ -43,20 +41,15 @@ export default function Register() {
   const [currentTeamIndex, setCurrentTeamIndex] = useState(0); 
   const [success, setSuccess] = useState(false);
 
-  // STATE UTAMA: Menyimpan Data Teks DAN File
   const [allTeamsData, setAllTeamsData] = useState([
     {
       groupData: { 
         namaKelompok: "", password: "", asalSekolah: "", email: "", noTelp: "", idLine: "",
-        buktiPembayaranFile: null // Menyimpan File Bukti Bayar
+        buktiPembayaranFile: null 
       },
       members: Array(3).fill(null).map(() => ({ 
         nama: "", alergi: "", polaMakan: "normal", penyakit: "",
-        // Menyimpan File Member
-        pasFotoFile: null,
-        kartuPelajarFile: null,
-        followCegFile: null,
-        followTkFile: null
+        pasFotoFile: null, kartuPelajarFile: null, followCegFile: null, followTkFile: null
       })),
     },
   ]);
@@ -74,7 +67,6 @@ export default function Register() {
     minimumFractionDigits: 0,
   }).format(totalHarga);
 
-  // Handler Text Input Group
   const handleGroupChange = (e) => {
     const { name, value } = e.target;
     if (name === "noTelp" && value !== "" && !/^\d+$/.test(value)) return;
@@ -83,26 +75,23 @@ export default function Register() {
     setAllTeamsData(updated);
   };
 
-  // Handler File Input Group (Bukti Bayar)
   const handleGroupFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
         const updated = [...allTeamsData];
-        // FIX: Jika bundle, simpan file di index 0 (Tim Pertama) agar ter-upload duluan
+        // FIX: Jika bundle, simpan file di index 0 (Tim Pertama)
         const targetIndex = regType === "bundle" ? 0 : currentTeamIndex;
         updated[targetIndex].groupData.buktiPembayaranFile = file;
         setAllTeamsData(updated);
     }
   };
 
-  // Handler Text Input Member
   const handleMemberChange = (memberIdx, field, val) => {
     const updated = [...allTeamsData];
     updated[currentTeamIndex].members[memberIdx][field] = val;
     setAllTeamsData(updated);
   };
 
-  // Handler File Input Member
   const handleMemberFileChange = (memberIdx, fieldName, e) => {
     const file = e.target.files[0];
     if (file) {
@@ -115,7 +104,6 @@ export default function Register() {
   const handleProcessNext = async (e) => {
     e.preventDefault();
 
-    // VALIDASI UKURAN FILE (10MB) DAN TIPE (JPG/PNG) SAAT STEP BERJALAN
     const fileInputs = e.target.querySelectorAll('input[type="file"]');
     for (let input of fileInputs) {
       if (input.files.length > 0) {
@@ -160,19 +148,15 @@ export default function Register() {
     } else if (step === 3) {
       setStep(4);
     } else if (step === 4) {
-      // === FINAL SUBMIT DENGAN DATA DARI STATE ===
       setLoading(true);
       
-      // Variable untuk menyimpan path bukti bayar dari tim pertama (Bundle)
       let bundlePaymentPath = null;
 
       try {
         for (let i = 0; i < allTeamsData.length; i++) {
           const team = allTeamsData[i];
-          
           const formData = new FormData();
 
-          // 1. Append Data Teks
           formData.append("nama_tim", team.groupData.namaKelompok);
           formData.append("password", team.groupData.password);
           formData.append("email", team.groupData.email);
@@ -183,7 +167,6 @@ export default function Register() {
           formData.append("paket", regType === "bundle" ? "BUNDLE" : "SINGLE");
           formData.append("status_pembayaran", "unverified");
 
-          // 2. Append Data Member JSON
           const membersData = team.members.map(m => ({
             nama_anggota: m.nama,
             pola_makan: m.polaMakan.toUpperCase(),
@@ -192,27 +175,23 @@ export default function Register() {
           }));
           formData.append("members", JSON.stringify(membersData));
 
-          // 3. LOGIKA BUKTI PEMBAYARAN BUNDLE
+          // LOGIKA BUNDLE
           if (regType === "bundle") {
             if (i === 0) {
-                // Tim Pertama: Upload File Fisik
                 if (team.groupData.buktiPembayaranFile) {
                     formData.append("bukti_pembayaran", team.groupData.buktiPembayaranFile);
                 }
             } else {
-                // Tim Kedua & Ketiga: Kirim Path (String) dari hasil upload Tim Pertama
                 if (bundlePaymentPath) {
                     formData.append("bukti_pembayaran_path", bundlePaymentPath);
                 }
             }
           } else {
-            // Single: Upload normal
             if (team.groupData.buktiPembayaranFile) {
                 formData.append("bukti_pembayaran", team.groupData.buktiPembayaranFile);
             }
           }
 
-          // 4. Append File Member (DARI STATE, BUKAN DOM)
           team.members.forEach((m, idx) => {
             if (m.pasFotoFile) formData.append(`member_${idx}_pas_foto`, m.pasFotoFile);
             if (m.kartuPelajarFile) formData.append(`member_${idx}_kartu_pelajar`, m.kartuPelajarFile);
@@ -220,15 +199,13 @@ export default function Register() {
             if (m.followTkFile) formData.append(`member_${idx}_follow_tk`, m.followTkFile);
           });
 
-          // EKSEKUSI REQUEST
           const res = await auth.register(formData);
           
-          // Tangkap error jika success: false (biasanya Axios tidak throw error jika status 200 tapi logic error)
           if (res.data && !res.data.success) {
             throw new Error(res.data.message || "Gagal mendaftarkan tim.");
           }
 
-          // SIMPAN PATH GAMBAR DARI TIM PERTAMA UNTUK TIM SELANJUTNYA
+          // SIMPAN PATH UNTUK TIM BERIKUTNYA
           if (regType === "bundle" && i === 0) {
              if(res.data?.data?.buktiPembayaranPath){
                  bundlePaymentPath = res.data.data.buktiPembayaranPath;
@@ -240,8 +217,7 @@ export default function Register() {
         setSuccess(true);
       } catch (err) {
         setLoading(false);
-        // Tampilkan pesan error spesifik dari backend (misal: "Nama tim sudah terdaftar")
-        const msg = err.response?.data?.message || err.message || "Terjadi kesalahan saat pendaftaran.";
+        const msg = err.response?.data?.message || err.message || "Terjadi kesalahan.";
         alert("Pendaftaran Gagal: " + msg);
         console.error("SUBMIT_ERROR:", err);
       }
@@ -257,7 +233,6 @@ export default function Register() {
     }
   };
 
-  // Helper untuk menampilkan file di Step 3 (karena bundle disimpan di index 0)
   const currentBuktiFile = regType === 'bundle' 
       ? allTeamsData[0].groupData.buktiPembayaranFile 
       : allTeamsData[currentTeamIndex].groupData.buktiPembayaranFile;
@@ -271,7 +246,6 @@ export default function Register() {
 
       <div className="relative flex flex-col items-center justify-center px-4 pt-10 pb-20">
         <div className="mb-4 text-center">
-            {/* Header / Judul Step */}
             <div className="mb-2">
                 <Image src="/Asset/LOGIN.png" alt="Welcome" width={400} height={150} className="drop-shadow-xl" />
             </div>
@@ -284,7 +258,6 @@ export default function Register() {
 
         <div className="w-full max-w-4xl bg-white/20 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl p-8 md:p-12">
           
-          {/* STEP 0: PILIH PAKET */}
           {step === 0 && (
             <div className="grid md:grid-cols-2 gap-6 py-10 animate-in fade-in duration-500">
               <button type="button" onClick={() => setRegType("single")} className={`p-8 rounded-3xl border-4 transition-all flex flex-col items-center gap-4 ${regType === 'single' ? 'border-teal-800 bg-teal-800/20' : 'border-white/40 bg-white/10'}`}>
@@ -303,13 +276,11 @@ export default function Register() {
 
           <form onSubmit={handleProcessNext} className="space-y-8">
             
-            {/* STEP 1: DATA TIM */}
             {step === 1 && (
               <div className="grid md:grid-cols-2 gap-8 animate-in fade-in duration-500">
                 <div className="md:col-span-2 border-b border-teal-900/10 pb-2">
                    <h2 className="text-2xl font-black text-teal-900 uppercase">Data Kelompok {regType === 'bundle' && (currentTeamIndex + 1)}</h2>
                 </div>
-                {/* Input Text Tim */}
                 <div className="space-y-2">
                   <Label className="text-teal-900 font-bold ml-1">Nama Kelompok</Label>
                   <Input name="namaKelompok" placeholder="Nama tim" value={allTeamsData[currentTeamIndex].groupData.namaKelompok} onChange={handleGroupChange} className={inputClass} required />
@@ -337,7 +308,6 @@ export default function Register() {
               </div>
             )}
 
-            {/* STEP 2: DATA MEMBER & UPLOAD FILE MEMBER */}
             {step === 2 && (
               <div className="space-y-12 animate-in fade-in duration-500">
                 {allTeamsData[currentTeamIndex].members.map((m, i) => (
@@ -348,7 +318,6 @@ export default function Register() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
-                      {/* Text Inputs */}
                       <div className="space-y-2">
                         <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">Nama Lengkap</Label>
                         <Input value={m.nama} placeholder="Sesuai Kartu Pelajar" onChange={(e) => handleMemberChange(i, "nama", e.target.value)} className={inputClass} required />
@@ -378,7 +347,6 @@ export default function Register() {
                         <Input value={m.penyakit} placeholder="Isi - jika tidak ada" onChange={(e) => handleMemberChange(i, "penyakit", e.target.value)} className={inputClass} required />
                       </div>
                       
-                      {/* === FILE INPUTS MEMBER (GUNAKAN onChange) === */}
                       <div className="space-y-2">
                         <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">Pas Foto 3x4</Label>
                         <Input type="file" onChange={(e) => handleMemberFileChange(i, "pasFotoFile", e)} className={fileInputClass} required={!m.pasFotoFile} />
@@ -408,14 +376,12 @@ export default function Register() {
               </div>
             )}
 
-            {/* STEP 3: UPLOAD BUKTI BAYAR */}
             {step === 3 && (
               <div className="p-6 md:p-8 rounded-[40px] bg-teal-900 text-white space-y-6 shadow-2xl animate-in zoom-in duration-300 border border-white/10">
                 <div className="flex items-center gap-4">
                   <div className="bg-yellow-400 p-2 rounded-2xl"><CreditCard size={32} className="text-teal-900" /></div>
                   <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight">Pembayaran Final</h2>
                 </div>
-                {/* Info Rekening */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/10 p-6 rounded-3xl backdrop-blur-sm border border-white/5">
                   <div className="space-y-1">
                     <p className="text-xs opacity-70 italic font-medium uppercase tracking-wider">Transfer Ke (BCA):</p>
@@ -428,7 +394,6 @@ export default function Register() {
                   </div>
                 </div>
                 
-                {/* FILE INPUT BUKTI BAYAR (GUNAKAN onChange) */}
                 <div className="space-y-3 pt-2">
                   <Label className="font-bold text-lg ml-1 block">Upload Bukti Transfer</Label>
                   <Input type="file" onChange={handleGroupFileChange} className={`${fileInputClass} bg-white/10 text-white file:bg-yellow-400 file:text-teal-900`} required={!currentBuktiFile} />
@@ -437,7 +402,6 @@ export default function Register() {
               </div>
             )}
 
-            {/* STEP 4: VERIFIKASI & SUBMIT */}
             {step === 4 && (
               <div className="max-w-2xl mx-auto space-y-6 text-center animate-in zoom-in duration-300">
                  <CheckCircle2 size={80} className="mx-auto text-teal-800" />
@@ -446,7 +410,6 @@ export default function Register() {
               </div>
             )}
 
-            {/* TOMBOL NAVIGASI */}
             <div className="flex items-center justify-between pt-10 border-t border-teal-800/10">
               {step > 0 ? (
                 <Button type="button" variant="ghost" onClick={handleBack} className="text-teal-900 font-bold text-lg hover:bg-white/20">
@@ -467,7 +430,6 @@ export default function Register() {
         </div>
       </div>
 
-      {/* POPUP SUKSES */}
       {success && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl">

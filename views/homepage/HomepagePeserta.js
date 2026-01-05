@@ -28,7 +28,6 @@ export default function HomepagePeserta() {
     const [isMobile, setIsMobile] = useState(false);
 
     // AMBIL TOKEN DARI REDUX STORE
-    // Pastikan user sudah login atau belum untuk mengubah tombol
     const token = useAppSelector((state) => state.token.token);
 
     useEffect(() => {
@@ -97,10 +96,7 @@ export default function HomepagePeserta() {
                                 Chemical Engineering Games atau CEG merupakan lomba tahunan yang diselenggarakan oleh Program
                                 Studi Teknik Kimia Universitas Surabaya dan ditujukan bagi siswa/i SMA/sederajat dari seluruh Indonesia.
                                 Kegiatan ini dikemas dalam bentuk rangkaian games yang seru, edukatif, dan unik, sehingga peserta tidak hanya
-                                ditantang secara kompetitif, tetapi juga diajak untuk berpikir kritis, kreatif, dan strategis. Melalui Chemical
-                                Engineering Games, peserta diperkenalkan pada konsep dasar Teknik Kimia dengan cara yang menyenangkan dan aplikatif,
-                                sekaligus melatih kemampuan kerja sama tim, problem solving, serta sportivitas. Ajang ini diharapkan dapat menumbuhkan
-                                minat terhadap dunia sains dan rekayasa, serta mengenal lebih dekat Program Studi Teknik Kimia Universitas Surabaya.
+                                ditantang secara kompetitif, tetapi juga diajak untuk berpikir kritis, kreatif, dan strategis.
                             </p>
                         </div>
 
@@ -177,13 +173,7 @@ export default function HomepagePeserta() {
                                 <h3 className="font-black text-teal-800 text-xl mb-1">MASKOT</h3>
                                 <p className="text-teal-950 font-medium text-sm md:text-base leading-relaxed text-justify">
                                     AGRINOVA menggambarkan sebuah ledakan inovasi yang lahir dari dunia pertanian sebagai respons
-                                    terhadap tantangan pangan masa kini dan masa depan. Kata “Nova” berarti bintang baru, yang menjadi simbol
-                                    munculnya gagasan, pendekatan, dan terobosan baru dalam menciptakan sistem pangan yang lebih sehat, efisien,
-                                    dan ramah lingkungan. Melalui konsep ini, AGRINOVA merepresentasikan semangat pembaruan dan kreativitas dalam
-                                    mengembangkan pertanian modern yang tidak hanya berorientasi pada hasil, tetapi juga pada keberlanjutan dan
-                                    kualitas. AGRINOVA merupakan langkah transformasi dari pertanian tradisional menuju sistem pangan masa depan
-                                    yang berbasis pada sains, teknologi, dan prinsip keberlanjutan, guna mendukung ketahanan pangan serta
-                                    kesejahteraan generasi mendatang.
+                                    terhadap tantangan pangan masa kini dan masa depan. Kata “Nova” berarti bintang baru...
                                 </p>
                             </div>
                         </div>
@@ -253,7 +243,7 @@ export default function HomepagePeserta() {
                     </div>
                 </section>
 
-                {/* ===== SECTION: PRE-EVENT ===== */}
+                {/* ===== SECTION: PRE-EVENT (DENGAN HARGA) ===== */}
                 <section id="pre-event" className="w-full flex flex-col items-center pt-20 md:pt-24">
                     <div>
                         <Image
@@ -266,7 +256,31 @@ export default function HomepagePeserta() {
                             loading="lazy"
                         />
                     </div>
-                    <div className="relative w-full max-w-4xl">
+                    
+                    {/* === TAMBAHAN PRICE LIST DI SINI === */}
+                    <div className="flex flex-col md:flex-row gap-6 my-8 z-10 px-4 w-full justify-center">
+                        <div className="bg-white/40 backdrop-blur-md border border-white/50 p-6 rounded-2xl text-center shadow-lg transform hover:scale-105 transition-transform w-full md:w-64">
+                            <h3 className="text-teal-900 font-bold text-xl mb-1">EARLY BIRD</h3>
+                            <p className="text-teal-800 text-sm mb-3">s/d 31 Desember 2025</p>
+                            <p className="text-3xl font-black text-[#d64040]">Rp 150.000</p>
+                            <p className="text-teal-900/60 text-xs mt-2">Per Tim</p>
+                        </div>
+                        <div className="bg-teal-900/10 backdrop-blur-md border border-teal-900/20 p-6 rounded-2xl text-center shadow-lg transform hover:scale-105 transition-transform w-full md:w-64">
+                            <h3 className="text-teal-900 font-bold text-xl mb-1">NORMAL</h3>
+                            <p className="text-teal-800 text-sm mb-3">Mulai 1 Januari 2026</p>
+                            <p className="text-3xl font-black text-teal-900">Rp 170.000</p>
+                            <p className="text-teal-900/60 text-xs mt-2">Per Tim</p>
+                        </div>
+                        <div className="bg-gradient-to-b from-yellow-300/40 to-yellow-500/40 backdrop-blur-md border border-yellow-400 p-6 rounded-2xl text-center shadow-xl transform hover:scale-105 transition-transform relative overflow-hidden w-full md:w-64">
+                            <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">HEMAT!</div>
+                            <h3 className="text-teal-900 font-bold text-xl mb-1">BUNDLE (3 Tim)</h3>
+                            <p className="text-teal-800 text-sm mb-3">Early Bird</p>
+                            <p className="text-3xl font-black text-[#d64040]">Rp 435.000</p>
+                            <p className="text-teal-900/60 text-xs mt-2">Total 3 Tim</p>
+                        </div>
+                    </div>
+
+                    <div className="relative w-full max-w-4xl px-4">
                         <Image
                             src="/Asset/PRE-EVENT.png"
                             alt="Poster"
@@ -395,7 +409,6 @@ export default function HomepagePeserta() {
                         </div>
                     </div>
 
-                    {/* DIVIDER */}
                     <div className="border-t border-white/30 my-6 md:my-8"></div>
 
                     <div>
