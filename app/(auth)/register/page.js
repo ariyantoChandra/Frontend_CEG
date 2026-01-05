@@ -101,9 +101,11 @@ export default function Register() {
     }
   };
 
+  // --- FUNGSI UTAMA YANG DIPERBAIKI ---
   const handleProcessNext = async (e) => {
     e.preventDefault();
 
+    // 1. VALIDASI FILE SIZE & TYPE
     const fileInputs = e.target.querySelectorAll('input[type="file"]');
     for (let input of fileInputs) {
       if (input.files.length > 0) {
@@ -122,6 +124,7 @@ export default function Register() {
       }
     }
 
+    // 2. LOGIKA PINDAH STEP
     if (step === 0) {
       const count = regType === "bundle" ? 3 : 1;
       setAllTeamsData(Array(count).fill(null).map(() => ({
@@ -148,73 +151,70 @@ export default function Register() {
     } else if (step === 3) {
       setStep(4);
     } else if (step === 4) {
-      setLoading(true);
       
-      let bundlePaymentPath = null;
+      // ============================================================
+      // LOGIKA FINAL SUBMIT (PERBAIKAN FULL)
+      // ============================================================
+      setLoading(true);
 
       try {
-        for (let i = 0; i < allTeamsData.length; i++) {
-          const team = allTeamsData[i];
-          const formData = new FormData();
+        const formData = new FormData();
 
-          formData.append("nama_tim", team.groupData.namaKelompok);
-          formData.append("password", team.groupData.password);
-          formData.append("email", team.groupData.email);
-          formData.append("asal_sekolah", team.groupData.asalSekolah);
-          formData.append("no_wa", team.groupData.noTelp);
-          formData.append("id_line", team.groupData.idLine);
-          formData.append("kategori_biaya", isEarlyBird ? "EARLY_BIRD" : "NORMAL");
-          formData.append("paket", regType === "bundle" ? "BUNDLE" : "SINGLE");
-          formData.append("status_pembayaran", "unverified");
+        // A. DATA TEKS (JSON STRING) - Dikirim duluan agar Backend bisa baca nama tim
+        const teamsPayload = allTeamsData.map((team) => ({
+            nama_tim: team.groupData.namaKelompok,
+            password: team.groupData.password,
+            email: team.groupData.email,
+            asal_sekolah: team.groupData.asalSekolah,
+            no_wa: team.groupData.noTelp,
+            id_line: team.groupData.idLine,
+            kategori_biaya: isEarlyBird ? "EARLY_BIRD" : "NORMAL",
+            paket: regType === "bundle" ? "BUNDLE" : "SINGLE",
+            status_pembayaran: "unverified",
+            members: team.members.map(m => ({
+                nama_anggota: m.nama,
+                pola_makan: m.polaMakan.toUpperCase(),
+                alergi: m.alergi || '-',
+                penyakit_bawaan: m.penyakit || '-'
+            }))
+        }));
+        
+        formData.append("teams_data", JSON.stringify(teamsPayload));
 
-          const membersData = team.members.map(m => ({
-            nama_anggota: m.nama,
-            pola_makan: m.polaMakan.toUpperCase(),
-            alergi: m.alergi || '-',
-            penyakit_bawaan: m.penyakit || '-'
-          }));
-          formData.append("members", JSON.stringify(membersData));
+        // B. FILE BUKTI PEMBAYARAN (Satu File untuk Semua)
+        const paymentFile = allTeamsData[0].groupData.buktiPembayaranFile;
+        if (paymentFile) {
+            formData.append("bukti_pembayaran", paymentFile);
+        }
 
-          // LOGIKA BUNDLE
-          if (regType === "bundle") {
-            if (i === 0) {
-                if (team.groupData.buktiPembayaranFile) {
-                    formData.append("bukti_pembayaran", team.groupData.buktiPembayaranFile);
-                }
-            } else {
-                if (bundlePaymentPath) {
-                    formData.append("bukti_pembayaran_path", bundlePaymentPath);
-                }
-            }
-          } else {
-            if (team.groupData.buktiPembayaranFile) {
-                formData.append("bukti_pembayaran", team.groupData.buktiPembayaranFile);
-            }
-          }
+        // C. FILE-FILE MEMBER (Looping Semua Tim & Member)
+        // Format Key: t{indexTim}_m{indexMember}_{jenisFile}
+        allTeamsData.forEach((team, teamIdx) => {
+            team.members.forEach((member, memberIdx) => {
+                if (member.pasFotoFile) 
+                    formData.append(`t${teamIdx}_m${memberIdx}_pas_foto`, member.pasFotoFile);
+                
+                if (member.kartuPelajarFile) 
+                    formData.append(`t${teamIdx}_m${memberIdx}_kartu_pelajar`, member.kartuPelajarFile);
+                
+                if (member.followCegFile) 
+                    formData.append(`t${teamIdx}_m${memberIdx}_follow_ceg`, member.followCegFile);
+                
+                if (member.followTkFile) 
+                    formData.append(`t${teamIdx}_m${memberIdx}_follow_tk`, member.followTkFile);
+            });
+        });
 
-          team.members.forEach((m, idx) => {
-            if (m.pasFotoFile) formData.append(`member_${idx}_pas_foto`, m.pasFotoFile);
-            if (m.kartuPelajarFile) formData.append(`member_${idx}_kartu_pelajar`, m.kartuPelajarFile);
-            if (m.followCegFile) formData.append(`member_${idx}_follow_ceg`, m.followCegFile);
-            if (m.followTkFile) formData.append(`member_${idx}_follow_tk`, m.followTkFile);
-          });
+        // D. KIRIM SEKALI SAJA 🚀
+        const res = await auth.register(formData);
 
-          const res = await auth.register(formData);
-          
-          if (res.data && !res.data.success) {
-            throw new Error(res.data.message || "Gagal mendaftarkan tim.");
-          }
-
-          // SIMPAN PATH UNTUK TIM BERIKUTNYA
-          if (regType === "bundle" && i === 0) {
-             if(res.data?.data?.buktiPembayaranPath){
-                 bundlePaymentPath = res.data.data.buktiPembayaranPath;
-             }
-          }
+        if (res.data && !res.data.success) {
+           throw new Error(res.data.message || "Gagal mendaftarkan tim.");
         }
 
         setLoading(false);
         setSuccess(true);
+
       } catch (err) {
         setLoading(false);
         const msg = err.response?.data?.message || err.message || "Terjadi kesalahan.";

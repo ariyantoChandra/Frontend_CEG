@@ -9,7 +9,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "http",
-        hostname: "api.cegubaya.com",
+        hostname: "localhost",
         port: "5000",
         pathname: "/public/**",
       },
