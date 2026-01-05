@@ -83,12 +83,12 @@ export default function Register() {
     setAllTeamsData(updated);
   };
 
-  // Handler File Input Group (Bukti Bayar) - DIPERBAIKI
+  // Handler File Input Group (Bukti Bayar)
   const handleGroupFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
         const updated = [...allTeamsData];
-        // FIX: Jika bundle, simpan file di index 0 (Tim Pertama) agar ter-upload duluan saat loop submit
+        // FIX: Jika bundle, simpan file di index 0 (Tim Pertama) agar ter-upload duluan
         const targetIndex = regType === "bundle" ? 0 : currentTeamIndex;
         updated[targetIndex].groupData.buktiPembayaranFile = file;
         setAllTeamsData(updated);
@@ -160,15 +160,16 @@ export default function Register() {
     } else if (step === 3) {
       setStep(4);
     } else if (step === 4) {
-      // === FINAL SUBMIT DENGAN PERBAIKAN LOGIKA BUNDLE ===
+      // === FINAL SUBMIT DENGAN DATA DARI STATE ===
       setLoading(true);
       
-      // Variable untuk menyimpan path bukti bayar dari tim pertama (Bundle Only)
+      // Variable untuk menyimpan path bukti bayar dari tim pertama (Bundle)
       let bundlePaymentPath = null;
 
       try {
         for (let i = 0; i < allTeamsData.length; i++) {
           const team = allTeamsData[i];
+          
           const formData = new FormData();
 
           // 1. Append Data Teks
@@ -180,8 +181,6 @@ export default function Register() {
           formData.append("id_line", team.groupData.idLine);
           formData.append("kategori_biaya", isEarlyBird ? "EARLY_BIRD" : "NORMAL");
           formData.append("paket", regType === "bundle" ? "BUNDLE" : "SINGLE");
-          
-          // FIX: Kirim status pembayaran default agar tidak error di backend
           formData.append("status_pembayaran", "unverified");
 
           // 2. Append Data Member JSON
@@ -193,10 +192,10 @@ export default function Register() {
           }));
           formData.append("members", JSON.stringify(membersData));
 
-          // 3. LOGIKA BARU UNTUK BUKTI PEMBAYARAN BUNDLE
+          // 3. LOGIKA BUKTI PEMBAYARAN BUNDLE
           if (regType === "bundle") {
             if (i === 0) {
-                // Tim Pertama: Upload File Fisik (yang disimpan di index 0)
+                // Tim Pertama: Upload File Fisik
                 if (team.groupData.buktiPembayaranFile) {
                     formData.append("bukti_pembayaran", team.groupData.buktiPembayaranFile);
                 }
@@ -213,7 +212,7 @@ export default function Register() {
             }
           }
 
-          // 4. Append File Member
+          // 4. Append File Member (DARI STATE, BUKAN DOM)
           team.members.forEach((m, idx) => {
             if (m.pasFotoFile) formData.append(`member_${idx}_pas_foto`, m.pasFotoFile);
             if (m.kartuPelajarFile) formData.append(`member_${idx}_kartu_pelajar`, m.kartuPelajarFile);
@@ -221,18 +220,19 @@ export default function Register() {
             if (m.followTkFile) formData.append(`member_${idx}_follow_tk`, m.followTkFile);
           });
 
-          // Eksekusi Register
+          // EKSEKUSI REQUEST
           const res = await auth.register(formData);
           
-          // Validasi response sukses
-          if (!res.data?.success) {
-            throw new Error(res.data?.message || `Gagal mendaftarkan tim ${i+1}`);
+          // Tangkap error jika success: false (biasanya Axios tidak throw error jika status 200 tapi logic error)
+          if (res.data && !res.data.success) {
+            throw new Error(res.data.message || "Gagal mendaftarkan tim.");
           }
 
-          // FIX: Simpan path gambar dari respon Tim Pertama untuk dipakai Tim berikutnya (Bundle Only)
-          if (regType === "bundle" && i === 0 && res.data?.success) {
-             // Pastikan backend mengembalikan struktur: data: { buktiPembayaranPath: "..." }
-             bundlePaymentPath = res.data.data.buktiPembayaranPath;
+          // SIMPAN PATH GAMBAR DARI TIM PERTAMA UNTUK TIM SELANJUTNYA
+          if (regType === "bundle" && i === 0) {
+             if(res.data?.data?.buktiPembayaranPath){
+                 bundlePaymentPath = res.data.data.buktiPembayaranPath;
+             }
           }
         }
 
@@ -240,8 +240,9 @@ export default function Register() {
         setSuccess(true);
       } catch (err) {
         setLoading(false);
-        // Tampilkan pesan error spesifik dari backend (misal: "nama tim sudah terdaftar")
-        alert(err.response?.data?.message || err.message || "Terjadi kesalahan saat pendaftaran.");
+        // Tampilkan pesan error spesifik dari backend (misal: "Nama tim sudah terdaftar")
+        const msg = err.response?.data?.message || err.message || "Terjadi kesalahan saat pendaftaran.";
+        alert("Pendaftaran Gagal: " + msg);
         console.error("SUBMIT_ERROR:", err);
       }
     }
@@ -256,7 +257,7 @@ export default function Register() {
     }
   };
 
-  // Helper variable untuk mengakses file yang benar di UI Step 3
+  // Helper untuk menampilkan file di Step 3 (karena bundle disimpan di index 0)
   const currentBuktiFile = regType === 'bundle' 
       ? allTeamsData[0].groupData.buktiPembayaranFile 
       : allTeamsData[currentTeamIndex].groupData.buktiPembayaranFile;
@@ -427,17 +428,10 @@ export default function Register() {
                   </div>
                 </div>
                 
-                {/* FILE INPUT BUKTI BAYAR (DIPERBAIKI) */}
+                {/* FILE INPUT BUKTI BAYAR (GUNAKAN onChange) */}
                 <div className="space-y-3 pt-2">
                   <Label className="font-bold text-lg ml-1 block">Upload Bukti Transfer</Label>
-                  {/* Input File: Handler sudah diperbaiki untuk menyimpan ke index 0 jika bundle */}
-                  <Input 
-                    type="file" 
-                    onChange={handleGroupFileChange} 
-                    className={`${fileInputClass} bg-white/10 text-white file:bg-yellow-400 file:text-teal-900`} 
-                    required={!currentBuktiFile} 
-                  />
-                  {/* Menampilkan nama file dari variable helper */}
+                  <Input type="file" onChange={handleGroupFileChange} className={`${fileInputClass} bg-white/10 text-white file:bg-yellow-400 file:text-teal-900`} required={!currentBuktiFile} />
                   {currentBuktiFile && <p className="text-xs text-yellow-400">File terpilih: {currentBuktiFile.name}</p>}
                 </div>
               </div>
