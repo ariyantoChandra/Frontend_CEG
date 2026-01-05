@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { admin } from "@/core/services/api"; // Import API admin
-import { Loader2, Search, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,16 +22,15 @@ export default function AdminDashboard() {
     try {
       const res = await admin.getAllTeams();
 
-      // PERBAIKAN DI SINI:
-      // Gunakan res.data.data untuk mengambil array tim yang sebenarnya
+      // Mengambil data dari res.data.data
       if (res.data && res.data.data) {
         setTeams(res.data.data);
       } else {
-        setTeams([]); // Jaga-jaga kalau kosong
+        setTeams([]);
       }
     } catch (error) {
       console.error("Gagal ambil data:", error);
-      setTeams([]); // Set array kosong jika error agar tidak crash
+      setTeams([]);
     } finally {
       setLoading(false);
     }
@@ -41,8 +40,8 @@ export default function AdminDashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
-    cookieStore.delete("token");
-    cookieStore.delete("settings")
+    // Hapus cookie jika pakai cookie storage juga
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     router.push("/login");
   };
 
@@ -80,7 +79,7 @@ export default function AdminDashboard() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button onClick={handleLogout}>Logout</Button>
+            <Button onClick={handleLogout} variant="destructive">Logout</Button>
           </div>
         </div>
 
@@ -94,29 +93,51 @@ export default function AdminDashboard() {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl font-bold text-teal-900 uppercase">
+                  <CardTitle className="text-xl font-bold text-teal-900 uppercase truncate pr-2">
                     {team.nama_tim}
                   </CardTitle>
+                  
+                  {/* Badge Status Pembayaran */}
                   {team.status_pembayaran === "verified" ? (
-                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                    <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-0 shrink-0">
                       Verified
                     </Badge>
                   ) : (
-                    <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
+                    <Badge className="bg-red-100 text-red-700 hover:bg-red-200 border-0 shrink-0">
                       Unverified
                     </Badge>
                   )}
                 </div>
               </CardHeader>
+              
               <CardContent>
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-3 text-sm text-gray-600">
                   <p className="flex items-center gap-2">
-                    <span className="font-semibold">Sekolah:</span>{" "}
-                    {team.asal_sekolah}
+                    <span className="font-semibold min-w-[70px]">Sekolah:</span>{" "}
+                    <span className="truncate">{team.asal_sekolah}</span>
                   </p>
+
+                  {/* === BAGIAN BARU: LABEL PAKET === */}
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold min-w-[70px]">Paket:</span>
+                    <Badge 
+                      className={
+                        // Logika Warna: Ungu (Bundle), Biru (Single)
+                        (team.paket && team.paket.toLowerCase().includes('bundle')) 
+                          ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-0" 
+                          : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-0"
+                      }
+                    >
+                      {/* Tampilkan uppercase biar rapi */}
+                      {team.paket ? team.paket.toUpperCase() : "SINGLE"}
+                    </Badge>
+                  </div>
+                  {/* ================================= */}
+
                   <p className="flex items-center gap-2">
-                    <span className="font-semibold">Anggota:</span>{" "}
-                    {team.jumlah_anggota} Orang
+                    <span className="font-semibold min-w-[70px]">Anggota:</span>{" "}
+                    {/* Fallback kalau jumlah_anggota null/undefined */}
+                    {team.jumlah_anggota || "-"} Orang
                   </p>
                 </div>
               </CardContent>

@@ -122,14 +122,16 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-    
-    /* === TAMBAHAN UNTUK CUSTOM CURSOR === */
-    /* Pastikan 'image.png' ada di folder public */
-    /* Angka 0 0 adalah titik koordinat klik (pojok kiri atas gambar) */
-    cursor: url('/cursor.png') 0 0, auto; 
-  }
+body {
+  /* Browser akan mengecek file ini, kalau ukurannya kecil (32x32), dia akan render. 
+     Kalau masih kegedean, dia akan pakai 'auto' */
+  cursor: url('/kurkur.png'), auto; 
+}
+
+/* Pastikan pointer juga diubah */
+a, button, .cursor-pointer {
+  cursor: url('/kurkur.png'), pointer;
+}
 
   /* OPSIONAL: Jika ingin link/tombol juga berubah kursornya (misal jadi tameng beda warna) */
   /* a, button, [role="button"] {
