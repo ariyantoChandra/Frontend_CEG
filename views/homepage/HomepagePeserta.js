@@ -172,8 +172,18 @@ export default function HomepagePeserta() {
                                 <p className="text-teal-950 font-bold mb-4 text-sm md:text-base uppercase italic">AGRINOVA: Agricultural Innovation for Sustainable Nutrition Advancement</p>
                                 <h3 className="font-black text-teal-800 text-xl mb-1">MASKOT</h3>
                                 <p className="text-teal-950 font-medium text-sm md:text-base leading-relaxed text-justify">
-                                    AGRINOVA menggambarkan sebuah ledakan inovasi yang lahir dari dunia pertanian sebagai respons
-                                    terhadap tantangan pangan masa kini dan masa depan. Kata “Nova” berarti bintang baru...
+                                    AGRINOVA menggambarkan sebuah ledakan inovasi yang lahir dari dunia 
+                                    pertanian sebagai respons terhadap tantangan pangan masa kini dan 
+                                    masa depan. Kata “Nova” berarti bintang baru, yang menjadi simbol 
+                                    munculnya gagasan, pendekatan, dan terobosan baru dalam menciptakan 
+                                    sistem pangan yang lebih sehat, efisien, dan ramah lingkungan. 
+                                    Melalui konsep ini, AGRINOVA merepresentasikan semangat pembaruan 
+                                    dan kreativitas dalam mengembangkan pertanian modern yang tidak hanya 
+                                    berorientasi pada hasil, tetapi juga pada keberlanjutan dan kualitas. 
+                                    AGRINOVA merupakan langkah transformasi dari pertanian tradisional 
+                                    menuju sistem pangan masa depan yang berbasis pada sains, teknologi, 
+                                    dan prinsip keberlanjutan, guna mendukung ketahanan pangan serta 
+                                    kesejahteraan generasi mendatang.
                                 </p>
                             </div>
                         </div>
@@ -232,6 +242,30 @@ export default function HomepagePeserta() {
                         <div className="relative w-full">
                             <Image
                                 src="/Asset/BABAK PERLOMBAAN.png"
+                                alt="Detail"
+                                width={1200}
+                                height={600}
+                                className="w-full h-auto drop-shadow-2xl"
+                                draggable={false}
+                                loading="lazy"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-center flex-col gap-0 mt:gap-10">
+                        <div>
+                            <Image
+                                src="/Asset/HADIAH TEXT.png"
+                                alt="Babak"
+                                width={550}
+                                height={150}
+                                className="drop-shadow-2xl w-[280px] md:w-[550px] h-auto object-contain"
+                                draggable={false}
+                                loading="lazy"
+                            />
+                        </div>
+                        <div className="relative w-full">
+                            <Image
+                                src="/Asset/HADIAH.png"
                                 alt="Detail"
                                 width={1200}
                                 height={600}
