@@ -4,6 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ... (variable theme kamu tetap sama) ... */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -47,6 +48,7 @@
 }
 
 :root {
+  /* ... (variable root kamu tetap sama) ... */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -82,6 +84,7 @@
 }
 
 .dark {
+  /* ... (variable dark mode kamu tetap sama) ... */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -121,5 +124,15 @@
   }
   body {
     @apply bg-background text-foreground;
+    
+    /* === TAMBAHAN UNTUK CUSTOM CURSOR === */
+    /* Pastikan 'image.png' ada di folder public */
+    /* Angka 0 0 adalah titik koordinat klik (pojok kiri atas gambar) */
+    cursor: url('/cursor.png') 0 0, auto; 
   }
+
+  /* OPSIONAL: Jika ingin link/tombol juga berubah kursornya (misal jadi tameng beda warna) */
+  /* a, button, [role="button"] {
+    cursor: url('/image-pointer.png') 0 0, pointer; 
+  } */
 }
