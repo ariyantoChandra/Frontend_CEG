@@ -71,7 +71,10 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="relative w-full md:w-96">
-              <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-3 text-gray-400"
+                size={20}
+              />
               <Input
                 placeholder="Cari nama tim..."
                 className="pl-10 bg-white text-black"
@@ -79,7 +82,9 @@ export default function AdminDashboard() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button onClick={handleLogout} variant="destructive">Logout</Button>
+            <Button onClick={handleLogout} variant="destructive">
+              Logout
+            </Button>
           </div>
         </div>
 
@@ -96,7 +101,7 @@ export default function AdminDashboard() {
                   <CardTitle className="text-xl font-bold text-teal-900 uppercase truncate pr-2">
                     {team.nama_tim}
                   </CardTitle>
-                  
+
                   {/* Badge Status Pembayaran */}
                   {team.status_pembayaran === "verified" ? (
                     <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-0 shrink-0">
@@ -109,7 +114,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
               </CardHeader>
-              
+
               <CardContent>
                 <div className="space-y-3 text-sm text-gray-600">
                   <p className="flex items-center gap-2">
@@ -120,11 +125,12 @@ export default function AdminDashboard() {
                   {/* === BAGIAN BARU: LABEL PAKET === */}
                   <div className="flex items-center gap-2">
                     <span className="font-semibold min-w-[70px]">Paket:</span>
-                    <Badge 
+                    <Badge
                       className={
                         // Logika Warna: Ungu (Bundle), Biru (Single)
-                        (team.paket && team.paket.toLowerCase().includes('bundle')) 
-                          ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-0" 
+                        team.paket &&
+                        team.paket.toLowerCase().includes("bundle")
+                          ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-0"
                           : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-0"
                       }
                     >
@@ -132,13 +138,6 @@ export default function AdminDashboard() {
                       {team.paket ? team.paket.toUpperCase() : "SINGLE"}
                     </Badge>
                   </div>
-                  {/* ================================= */}
-
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold min-w-[70px]">Anggota:</span>{" "}
-                    {/* Fallback kalau jumlah_anggota null/undefined */}
-                    {team.jumlah_anggota || "-"} Orang
-                  </p>
                 </div>
               </CardContent>
             </Card>
