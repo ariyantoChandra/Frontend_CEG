@@ -19,7 +19,7 @@ const getImageUrl = (filename, type) => {
   if (!filename) return "/placeholder.png"; // Gambar default jika kosong
   
   // Ganti localhost:5000 jika sudah deploy, atau gunakan environment variable
-  const BASE_URL = "http://localhost:5000"; 
+  const BASE_URL = "https://api.cegubaya.com"; 
   
   let folder = "";
   
@@ -43,7 +43,6 @@ const getImageUrl = (filename, type) => {
       folder = ""; // Fallback
   }
 
-  // Hasil: http://localhost:5000/public/uploads/member/pas_foto/namafile.png
   return `${BASE_URL}/public/uploads/${folder}/${filename}`;
 };
 

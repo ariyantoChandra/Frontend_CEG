@@ -61,12 +61,6 @@ export default function HomePageAdmin() {
 
   const fetchRallyStatus = async () => {
     try {
-      // TODO: Ganti dengan endpoint API Express kamu yang sebenarnya
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rally/status`);
-      // const data = await response.json();
-      // setRallyStatus(data.data.isStarted);
-
-      // MOCK DATA (Simulasi)
       await new Promise((resolve) => setTimeout(resolve, 500));
       setRallyStatus(false); // Default: Not Started
     } catch (err) {
@@ -79,62 +73,7 @@ export default function HomePageAdmin() {
     try {
       setLoading(true);
       setError(null);
-
-      // TODO: Ganti dengan endpoint API Express kamu yang sebenarnya
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/teams`);
-      // if (!response.ok) throw new Error('Failed to fetch teams');
-      // const data = await response.json();
-      // setTeams(data.data);
-
-      // MOCK DATA - Replace with actual API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockTeams = [
-        {
-          id: 1,
-          nama_tim: "Team Alpha",
-          asal_sekolah: "SMA Negeri 1 Jakarta",
-          status_pembayaran: "LUNAS",
-          jumlah_anggota: 3,
-        },
-        {
-          id: 2,
-          nama_tim: "Team Beta",
-          asal_sekolah: "SMA Negeri 2 Bandung",
-          status_pembayaran: "BELUM LUNAS",
-          jumlah_anggota: 3,
-        },
-        {
-          id: 3,
-          nama_tim: "Team Gamma",
-          asal_sekolah: "SMA Negeri 3 Surabaya",
-          status_pembayaran: "LUNAS",
-          jumlah_anggota: 3,
-        },
-        {
-          id: 4,
-          nama_tim: "Team Delta",
-          asal_sekolah: "SMA Negeri 4 Medan",
-          status_pembayaran: "LUNAS",
-          jumlah_anggota: 3,
-        },
-        {
-          id: 5,
-          nama_tim: "Team Epsilon",
-          asal_sekolah: "SMA Negeri 5 Yogyakarta",
-          status_pembayaran: "BELUM LUNAS",
-          jumlah_anggota: 3,
-        },
-        {
-          id: 6,
-          nama_tim: "Team Zeta",
-          asal_sekolah: "SMA Negeri 6 Semarang",
-          status_pembayaran: "LUNAS",
-          jumlah_anggota: 3,
-        },
-      ];
-
-      setTeams(mockTeams);
 
       // Calculate statistics
       const verified = mockTeams.filter(
