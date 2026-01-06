@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import Navbar from "@/components/shared/Dashboard/navbar";
 import { auth } from "@/core/services/api";
+import { Eye, EyeOff } from "lucide-react";
+
 
 const inputClass =
   "bg-white/40 border-none rounded-xl py-6 px-4 text-teal-900 placeholder:text-teal-800/50 " +
@@ -54,7 +56,24 @@ export default function Register() {
     },
   ]);
 
-  const isEarlyBird = new Date() < new Date("2025-12-31"); 
+  const [showPassword, setShowPassword] = useState(false);
+
+  
+  // Hanya huruf, angka, dan spasi
+  const filterAllSpecialChars = (value) => {
+    return value.replace(/[^a-zA-Z0-9 ]/g, "");
+  };
+
+  // Khusus email
+  const filterEmailChars = (value) => {
+    return value.replace(/[^a-zA-Z0-9@._-]/g, "");
+  };
+
+  const hasSpecialChars = (value) => {
+    return /[^a-zA-Z0-9 ]/.test(value);
+  };
+
+  const isEarlyBird = new Date() < new Date("2026-1-23"); 
   const getPrice = () => {
     if (regType === "single") return isEarlyBird ? 150000 : 170000;
     return isEarlyBird ? 435000 : 495000;
@@ -69,9 +88,16 @@ export default function Register() {
 
   const handleGroupChange = (e) => {
     const { name, value } = e.target;
-    if (name === "noTelp" && value !== "" && !/^\d+$/.test(value)) return;
+    let filteredValue =
+      name === "email"
+        ? filterEmailChars(value)
+        : filterAllSpecialChars(value);
+
+    if (name === "noTelp" && filteredValue !== "" && !/^\d+$/.test(filteredValue)) {
+      return;
+    }
     const updated = [...allTeamsData];
-    updated[currentTeamIndex].groupData[name] = value;
+    updated[currentTeamIndex].groupData[name] = filteredValue; // ✅ FIX
     setAllTeamsData(updated);
   };
 
@@ -87,8 +113,9 @@ export default function Register() {
   };
 
   const handleMemberChange = (memberIdx, field, val) => {
+    const filteredValue = filterAllSpecialChars(val);
     const updated = [...allTeamsData];
-    updated[currentTeamIndex].members[memberIdx][field] = val;
+    updated[currentTeamIndex].members[memberIdx][field] = filteredValue; // ✅ FIX
     setAllTeamsData(updated);
   };
 
@@ -105,6 +132,21 @@ export default function Register() {
   const handleProcessNext = async (e) => {
     e.preventDefault();
 
+    const textInputs = e.target.querySelectorAll('input[type="text"]');
+    for (let input of textInputs) {
+      if (/[^a-zA-Z0-9 ]/.test(input.value)) {
+        alert(`Input "${input.placeholder}" mengandung karakter terlarang`);
+        return;
+      }
+    }
+    const emailInputs = e.target.querySelectorAll('input[type="email"]');
+
+    for (let input of emailInputs) {
+      if (/[^a-zA-Z0-9@._-]/.test(input.value)) {
+        alert("Email mengandung karakter tidak valid");
+        return;
+      }
+    }
     // 1. VALIDASI FILE SIZE & TYPE
     const fileInputs = e.target.querySelectorAll('input[type="file"]');
     for (let input of fileInputs) {
@@ -287,8 +329,29 @@ export default function Register() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-teal-900 font-bold ml-1">Password</Label>
-                  <Input type="password" name="password" placeholder="Password tim" value={allTeamsData[currentTeamIndex].groupData.password} onChange={handleGroupChange} className={inputClass} required />
+
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="Password tim"
+                      value={allTeamsData[currentTeamIndex].groupData.password}
+                      onChange={handleGroupChange}
+                      className={`${inputClass} pr-12`}
+                      required
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-4 flex items-center text-teal-800 hover:text-teal-600"
+                    >
+                      {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </button>
+                  </div>
                 </div>
+
+
                 <div className="space-y-2">
                   <Label className="text-teal-900 font-bold ml-1">Asal Sekolah</Label>
                   <Input name="asalSekolah" placeholder="SMA..." value={allTeamsData[currentTeamIndex].groupData.asalSekolah} onChange={handleGroupChange} className={inputClass} required />
@@ -349,25 +412,25 @@ export default function Register() {
                       
                       <div className="space-y-2">
                         <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">Pas Foto 3x4</Label>
-                        <Input type="file" onChange={(e) => handleMemberFileChange(i, "pasFotoFile", e)} className={fileInputClass} required={!m.pasFotoFile} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleMemberFileChange(i, "pasFotoFile", e)} className={fileInputClass} required={!m.pasFotoFile} />
                         {m.pasFotoFile && <p className="text-xs text-teal-800">File terpilih: {m.pasFotoFile.name}</p>}
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">Foto Kartu Pelajar</Label>
-                        <Input type="file" onChange={(e) => handleMemberFileChange(i, "kartuPelajarFile", e)} className={fileInputClass} required={!m.kartuPelajarFile} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleMemberFileChange(i, "kartuPelajarFile", e)} className={fileInputClass} required={!m.kartuPelajarFile} />
                         {m.kartuPelajarFile && <p className="text-xs text-teal-800">File terpilih: {m.kartuPelajarFile.name}</p>}
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">Follow @ceg.ubaya</Label>
-                        <Input type="file" onChange={(e) => handleMemberFileChange(i, "followCegFile", e)} className={fileInputClass} required={!m.followCegFile} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleMemberFileChange(i, "followCegFile", e)} className={fileInputClass} required={!m.followCegFile} />
                         {m.followCegFile && <p className="text-xs text-teal-800">File terpilih: {m.followCegFile.name}</p>}
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">Follow @officialtkubaya</Label>
-                        <Input type="file" onChange={(e) => handleMemberFileChange(i, "followTkFile", e)} className={fileInputClass} required={!m.followTkFile} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleMemberFileChange(i, "followTkFile", e)} className={fileInputClass} required={!m.followTkFile} />
                         {m.followTkFile && <p className="text-xs text-teal-800">File terpilih: {m.followTkFile.name}</p>}
                       </div>
                     </div>
@@ -396,7 +459,7 @@ export default function Register() {
                 
                 <div className="space-y-3 pt-2">
                   <Label className="font-bold text-lg ml-1 block">Upload Bukti Transfer</Label>
-                  <Input type="file" onChange={handleGroupFileChange} className={`${fileInputClass} bg-white/10 text-white file:bg-yellow-400 file:text-teal-900`} required={!currentBuktiFile} />
+                  <Input type="file" accept="image/*" onChange={handleGroupFileChange} className={`${fileInputClass} bg-white/10 text-white file:bg-yellow-400 file:text-teal-900`} required={!currentBuktiFile} />
                   {currentBuktiFile && <p className="text-xs text-yellow-400">File terpilih: {currentBuktiFile.name}</p>}
                 </div>
               </div>
