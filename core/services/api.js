@@ -94,3 +94,11 @@ export const sortTheProcess = {
   postResult: (data) =>
     handleRequest(axiosInstance.post("/api/user/sort/get-sort-answer", data)),
 };
+
+export const structureOfAtomic = {
+  getItemsQuestion: (data) =>
+    handleRequest(axiosInstance.post("/api/user/atomic/get-atomic-items", data)),
+
+  postResult: (data) =>
+    handleRequest(axiosInstance.post("/api/user/atomic/get-atomic-answer", data)),
+};

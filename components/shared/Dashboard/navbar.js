@@ -192,9 +192,9 @@ export default function Navbar() {
                     {role !== "ADMIN" && (
                       <DropdownMenuItem>
                         <Badge
-                          className={`rounded-none font-bold shadow-lg text-sm ${statusPayment === "unverified" ? "text-white bg-yellow-300" : statusPayment === "verified" ? "text-white bg-green-500" : "text-white bg-yellow-500"}`}
+                          className={`rounded-none font-bold shadow-lg text-sm ${statusPayment === "unverified" ? "text-white bg-yellow-300" : "text-white bg-green-500"}`}
                         >
-                          {statusPayment === "unverified" ? "Menunggu Terverifikasi" : statusPayment === "verified" ? "Terverifikasi" : "Menunggu Verifikasi"}
+                          {statusPayment === "unverified" ? "Menunggu Terverifikasi" : "Terverifikasi"}
                         </Badge>
                       </DropdownMenuItem>
                     )}
