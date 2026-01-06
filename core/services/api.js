@@ -8,11 +8,8 @@ const axiosInstance = createAxiosInstance();
 export const auth = {
   login: (data) => handleRequest(axiosInstance.post("api/auth/login", data)),
 
-  // FUNGSI REGISTER BARU
   register: (data) =>
     handleRequest(axiosInstance.post("/api/auth/register", data)),
-  registerAdmin: (data) =>
-    handleRequest(axiosInstance.post("/api/auth/register-admin", data)),
 };
 
 export const user = {
@@ -78,7 +75,6 @@ export const admin = {
   // Ambil detail tim
   getTeamDetail: (teamId) =>
     handleRequest(axiosInstance.get(`/api/admin/get-team-detail/${teamId}`)),
-  // === PERBAIKAN DI SINI: GUNAKAN FORMDATA ===
   verifyTeam: (teamId, status) => {
     // 1. Buat FormData
     const formData = new FormData();

@@ -291,13 +291,13 @@ export default function HomepagePeserta() {
                     <div className="flex flex-col md:flex-row gap-6 my-8 z-10 px-4 w-full justify-center">
                         <div className="bg-white/40 backdrop-blur-md border border-white/50 p-6 rounded-2xl text-center shadow-lg transform hover:scale-105 transition-transform w-full md:w-64">
                             <h3 className="text-teal-900 font-bold text-xl mb-1">EARLY BIRD</h3>
-                            <p className="text-teal-800 text-sm mb-3">s/d 31 Desember 2025</p>
+                            <p className="text-teal-800 text-sm mb-3">6 - 22 Januari 2026</p>
                             <p className="text-3xl font-black text-[#d64040]">Rp 150.000</p>
                             <p className="text-teal-900/60 text-xs mt-2">Per Tim</p>
                         </div>
                         <div className="bg-teal-900/10 backdrop-blur-md border border-teal-900/20 p-6 rounded-2xl text-center shadow-lg transform hover:scale-105 transition-transform w-full md:w-64">
                             <h3 className="text-teal-900 font-bold text-xl mb-1">NORMAL</h3>
-                            <p className="text-teal-800 text-sm mb-3">Mulai 1 Januari 2026</p>
+                            <p className="text-teal-800 text-sm mb-3">23 Januari - 21 Februari 2026</p>
                             <p className="text-3xl font-black text-teal-900">Rp 170.000</p>
                             <p className="text-teal-900/60 text-xs mt-2">Per Tim</p>
                         </div>
