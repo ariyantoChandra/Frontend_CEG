@@ -12,17 +12,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import { FaLine, FaWhatsapp } from "react-icons/fa";
+import { Badge } from "@/components/ui/badge";
 
 // --- PERBAIKAN 1: HELPER URL ---
 // Kita butuh parameter 'type' untuk menentukan folder sub-nya
 const getImageUrl = (filename, type) => {
   if (!filename) return "/placeholder.png"; // Gambar default jika kosong
-  
+
   // Ganti localhost:5000 jika sudah deploy, atau gunakan environment variable
-  const BASE_URL = "https://api.cegubaya.com"; 
-  
+  const BASE_URL = "https://api.cegubaya.com";
+
   let folder = "";
-  
+
   switch (type) {
     case "bukti_pembayaran":
       folder = "pembayaran";
@@ -75,7 +77,7 @@ export default function TeamDetailPage() {
     setProcessing(true);
     try {
       await admin.verifyTeam(teamId, newStatus);
-      fetchDetail(); 
+      fetchDetail();
     } catch (error) {
       alert("Gagal update status");
     } finally {
@@ -106,6 +108,16 @@ export default function TeamDetailPage() {
               {data.nama_tim}
             </h1>
             <p className="text-gray-500 font-medium">{data.asal_sekolah}</p>
+            <div className="my-3 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <FaWhatsapp color="green" size={20} />
+                <p className="text-black font-medium">{data.no_wa}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaLine color="green" size={20} />
+                <p className="text-black font-medium">{data.id_line}</p>
+              </div>
+            </div>
             <div className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold ${data.status_pembayaran === "verified" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
               {data.status_pembayaran === "verified" ? <CheckCircle size={16} /> : <XCircle size={16} />}
               {data.status_pembayaran?.toUpperCase()}
@@ -129,7 +141,19 @@ export default function TeamDetailPage() {
         {/* --- PERBAIKAN 2: BUKTI PEMBAYARAN --- */}
         <Card>
           <CardHeader>
-            <CardTitle>Bukti Pembayaran</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Bukti Pembayaran
+              <Badge
+                className={
+                  data.paket &&
+                    data.paket.toLowerCase().includes("bundle")
+                    ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-0"
+                    : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-0"
+                }
+              >
+                {data.paket ? data.paket.toUpperCase() : "SINGLE"}
+              </Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {data.bukti_pembayaran ? (
@@ -140,6 +164,7 @@ export default function TeamDetailPage() {
                   alt="Bukti Bayar"
                   fill
                   className="object-contain bg-gray-100"
+                  loading="lazy"
                 />
                 <a
                   href={getImageUrl(data.bukti_pembayaran, "bukti_pembayaran")}
@@ -169,6 +194,7 @@ export default function TeamDetailPage() {
                       alt={m.nama_anggota}
                       fill
                       className="object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-400">No Photo</div>
@@ -181,7 +207,7 @@ export default function TeamDetailPage() {
                     <p>Alergi: {m.alergi}</p>
                     <p>Penyakit: {m.penyakit_bawaan}</p>
                   </div>
-                  
+
                   {/* UPDATE LINK DOWNLOAD/VIEW */}
                   <div className="flex flex-col gap-2 pt-2">
                     {m.pas_foto && (
