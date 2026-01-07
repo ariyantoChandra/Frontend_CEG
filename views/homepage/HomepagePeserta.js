@@ -166,7 +166,6 @@ export default function HomepagePeserta() {
                             <div className="bg-white/40 backdrop-blur-sm rounded-[25px] p-6 md:p-8 shadow-lg w-full border border-white/20">
                                 <h3 className="font-black text-teal-800 text-xl mb-1">TEMA</h3>
                                 <p className="text-teal-950 font-bold mb-4 text-sm md:text-base uppercase italic">AGRINOVA: Agricultural Innovation for Sustainable Nutrition Advancement</p>
-                                <h3 className="font-black text-teal-800 text-xl mb-1">MASKOT</h3>
                                 <p className="text-teal-950 font-medium text-sm md:text-base leading-relaxed text-justify">
                                     AGRINOVA menggambarkan sebuah ledakan inovasi yang lahir dari dunia
                                     pertanian sebagai respons terhadap tantangan pangan masa kini dan
