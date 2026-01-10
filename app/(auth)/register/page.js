@@ -60,6 +60,7 @@ export default function Register() {
           alergi: "",
           polaMakan: "normal",
           penyakit: "",
+          usn_ig: "",
           pasFotoFile: null,
           kartuPelajarFile: null,
           followCegFile: null,
@@ -77,6 +78,11 @@ export default function Register() {
 
   // Khusus email
   const filterEmailChars = (value) => {
+    return value.replace(/[^a-zA-Z0-9@._-]/g, "");
+  };
+
+  // Khusus username Instagram (mengizinkan @, _, ., -)
+  const filterInstagramUsername = (value) => {
     return value.replace(/[^a-zA-Z0-9@._-]/g, "");
   };
 
@@ -126,10 +132,19 @@ export default function Register() {
   };
 
   const handleMemberChange = (memberIdx, field, val) => {
-    const filteredValue = filterAllSpecialChars(val);
-    const updated = [...allTeamsData];
-    updated[currentTeamIndex].members[memberIdx][field] = filteredValue; // ✅ FIX
-    setAllTeamsData(updated);
+    let filteredValue;
+    if (field === "username") {
+      // Username Instagram boleh mengandung @, _, ., -
+      filteredValue = filterInstagramUsername(val);
+      const updated = [...allTeamsData];
+      updated[currentTeamIndex].members[memberIdx].usn_ig = filteredValue;
+      setAllTeamsData(updated);
+    } else {
+      filteredValue = filterAllSpecialChars(val);
+      const updated = [...allTeamsData];
+      updated[currentTeamIndex].members[memberIdx][field] = filteredValue;
+      setAllTeamsData(updated);
+    }
   };
 
   const handleMemberFileChange = (memberIdx, fieldName, e) => {
@@ -147,7 +162,14 @@ export default function Register() {
 
     const textInputs = e.target.querySelectorAll('input[type="text"]');
     for (let input of textInputs) {
-      if (/[^a-zA-Z0-9 ]/.test(input.value)) {
+      const placeholder = input.placeholder?.toLowerCase() || "";
+      // Username Instagram boleh mengandung @, _, ., -
+      const isInstagramUsername = placeholder.includes("instagram");
+      const allowedPattern = isInstagramUsername 
+        ? /[^a-zA-Z0-9@._-]/ 
+        : /[^a-zA-Z0-9 ]/;
+      
+      if (allowedPattern.test(input.value)) {
         alert(`Input "${input.placeholder}" mengandung karakter terlarang`);
         return;
       }
@@ -202,6 +224,7 @@ export default function Register() {
                 alergi: "",
                 polaMakan: "normal",
                 penyakit: "",
+                usn_ig: "",
                 pasFotoFile: null,
                 kartuPelajarFile: null,
                 followCegFile: null,
@@ -242,6 +265,7 @@ export default function Register() {
             pola_makan: m.polaMakan.toUpperCase(),
             alergi: m.alergi || "-",
             penyakit_bawaan: m.penyakit || "-",
+            usn_ig: m.usn_ig || "",
           })),
         }));
 
@@ -271,13 +295,13 @@ export default function Register() {
 
             if (member.followCegFile)
               formData.append(
-                `t${teamIdx}_m${memberIdx}_follow_ceg`,
+                `${member.usn_ig}_t${teamIdx}_m${memberIdx}_follow_ceg`,
                 member.followCegFile
               );
 
             if (member.followTkFile)
               formData.append(
-                `t${teamIdx}_m${memberIdx}_follow_tk`,
+                `${member.usn_ig}_t${teamIdx}_m${memberIdx}_follow_tk`,
                 member.followTkFile
               );
           });
@@ -355,11 +379,10 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setRegType("single")}
-                className={`p-8 rounded-3xl border-4 transition-all flex flex-col items-center gap-4 ${
-                  regType === "single"
-                    ? "border-teal-800 bg-teal-800/20"
-                    : "border-white/40 bg-white/10"
-                }`}
+                className={`p-8 rounded-3xl border-4 transition-all flex flex-col items-center gap-4 ${regType === "single"
+                  ? "border-teal-800 bg-teal-800/20"
+                  : "border-white/40 bg-white/10"
+                  }`}
               >
                 <Users size={48} className="text-teal-900" />
                 <h3 className="text-2xl font-black text-teal-900">
@@ -370,11 +393,10 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setRegType("bundle")}
-                className={`p-8 rounded-3xl border-4 transition-all flex flex-col items-center gap-4 ${
-                  regType === "bundle"
-                    ? "border-teal-800 bg-teal-800/20"
-                    : "border-white/40 bg-white/10"
-                }`}
+                className={`p-8 rounded-3xl border-4 transition-all flex flex-col items-center gap-4 ${regType === "bundle"
+                  ? "border-teal-800 bg-teal-800/20"
+                  : "border-white/40 bg-white/10"
+                  }`}
               >
                 <div className="flex gap-1">
                   <Users size={40} className="text-teal-900" />
@@ -558,7 +580,7 @@ export default function Register() {
                         </Label>
                         <Input
                           value={m.alergi}
-                          placeholder="Isi - jika tidak ada"
+                          placeholder='Isi "Tidak Ada", jika tidak memilih Alergi'
                           onChange={(e) =>
                             handleMemberChange(i, "alergi", e.target.value)
                           }
@@ -573,9 +595,24 @@ export default function Register() {
                         </Label>
                         <Input
                           value={m.penyakit}
-                          placeholder="Isi - jika tidak ada"
+                          placeholder='Isi "Tidak Ada", jika tidak memilih Penyakit'
                           onChange={(e) =>
                             handleMemberChange(i, "penyakit", e.target.value)
+                          }
+                          className={inputClass}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2 col-span-2">
+                        <Label className="text-teal-900 font-bold ml-1 uppercase text-xs tracking-widest">
+                          Username Instagram
+                        </Label>
+                        <Input
+                          value={m.usn_ig}
+                          placeholder="Username Instagram"
+                          onChange={(e) =>
+                            handleMemberChange(i, "username", e.target.value)
                           }
                           className={inputClass}
                           required

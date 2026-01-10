@@ -40,6 +40,7 @@ export default function AdminDashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
+    localStorage.removeItem("user_id")
     // Hapus cookie jika pakai cookie storage juga
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     router.push("/login");
@@ -129,7 +130,7 @@ export default function AdminDashboard() {
                       className={
                         // Logika Warna: Ungu (Bundle), Biru (Single)
                         team.paket &&
-                        team.paket.toLowerCase().includes("bundle")
+                          team.paket.toLowerCase().includes("bundle")
                           ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-0"
                           : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-0"
                       }
