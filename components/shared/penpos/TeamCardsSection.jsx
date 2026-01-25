@@ -12,12 +12,14 @@ export default function TeamCardsSection({
             <TeamResultCard
                 teamData={gameResults.team1}
                 onStatusChange={onTeam1StatusChange}
+                teamNumber={1}
             />
 
             {posType === "BATTLE" && gameResults.team2 && (
                 <TeamResultCard
                     teamData={gameResults.team2}
                     onStatusChange={onTeam2StatusChange}
+                    teamNumber={2}
                 />
             )}
         </>

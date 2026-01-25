@@ -32,6 +32,9 @@ export const penpos = {
 
   resultMatch: (data) =>
     handleRequest(axiosInstance.post("/api/penpos/match-result", data)),
+
+  getScore: (data) =>
+    handleRequest(axiosInstance.post("/api/penpos/get-score", data)),
 };
 
 export const pos = {
@@ -101,4 +104,12 @@ export const structureOfAtomic = {
 
   postResult: (data) =>
     handleRequest(axiosInstance.post("/api/user/atomic/get-atomic-answer", data)),
+};
+
+export const answerTheQuestion = {
+  getItemsQuestion: (data) =>
+    handleRequest(axiosInstance.post("/api/user/question/get-question", data)),
+
+  postResult: (data) =>
+    handleRequest(axiosInstance.post("/api/user/question/get-answer", data)),
 };
