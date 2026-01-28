@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
 import { colorClasses } from "../utils/colorClasses";
@@ -8,16 +9,14 @@ export default function EquipmentCard({
   isDisabled,
   onClick,
 }) {
-  const Icon = equipment.icon;
   const colorClass = colorClasses[equipment.color] || colorClasses.blue;
 
   return (
     <Card
-      className={`group relative border-2 ${colorClass.border} ${colorClass.bg} backdrop-blur-xl transition-all ${
-        isDisabled || isCompleted
-          ? "cursor-not-allowed opacity-50"
-          : `cursor-pointer ${colorClass.hover} hover:shadow-lg`
-      }`}
+      className={`group relative border-2 ${colorClass.border} ${colorClass.bg} backdrop-blur-xl transition-all ${isDisabled || isCompleted
+        ? "cursor-not-allowed opacity-50"
+        : `cursor-pointer ${colorClass.hover} hover:shadow-lg`
+        }`}
       onClick={() => !isDisabled && !isCompleted && onClick(equipment)}
     >
       {isCompleted && (
@@ -27,14 +26,17 @@ export default function EquipmentCard({
       )}
 
       <CardContent className="flex flex-col items-center justify-center p-8">
-        <div
-          className={`mb-4 rounded-full ${colorClass.bg} p-6 transition-transform ${
-            !isDisabled && !isCompleted ? "group-hover:scale-110" : ""
-          }`}
-        >
-          <Icon className={`h-12 w-12 ${colorClass.text}`} />
-        </div>
-        <h3 className="text-lg font-semibold text-white">{equipment.name}</h3>
+        {equipment.image && (
+          <div className="relative mb-4 h-32 w-32 shrink-0 overflow-hidden">
+            <Image
+              src={equipment.image}
+              alt={equipment.name}
+              fill
+              className="object-cover"
+              sizes="64px"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -13,6 +13,11 @@ const nextConfig = {
         port: "5000",
         pathname: "/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.cegubaya.com",
+        pathname: "/**",
+      },
     ],
   },
 };

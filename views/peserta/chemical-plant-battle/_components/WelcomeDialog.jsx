@@ -7,13 +7,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-export default function WelcomeDialog({ isOpen, onClose }) {
+export default function WelcomeDialog({ isOpen, onClose, equipmentName }) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="border-white/10 bg-zinc-900/95 backdrop-blur-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl text-white">
-            Absorber mengalami masalah !!!!!
+            {equipmentName || "Alat"} mengalami masalah !!!!!
           </AlertDialogTitle>
           <AlertDialogDescription className="text-zinc-300">
             Silakan pilih peralatan yang tepat untuk memulai permainan

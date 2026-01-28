@@ -113,3 +113,14 @@ export const answerTheQuestion = {
   postResult: (data) =>
     handleRequest(axiosInstance.post("/api/user/question/get-answer", data)),
 };
+
+export const chemicalPlantBattle = {
+  getToolCp: (data) =>
+    handleRequest(axiosInstance.post("/api/user/cpbattle/get-cp-tools", data)),
+
+  getToolQuestion: (data) =>
+    handleRequest(axiosInstance.post("/api/user/cpbattle/get-cp-question", data)),
+
+  getToolAnswer: (data) =>
+    handleRequest(axiosInstance.post("/api/user/cpbattle/get-cp-answer", data)),
+};

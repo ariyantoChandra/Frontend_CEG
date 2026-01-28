@@ -8,11 +8,16 @@ import {
 } from "@/components/ui/dialog";
 import { Factory } from "lucide-react";
 
+import { Loader2 } from "lucide-react";
+
 export default function QuestionDialog({
   isOpen,
   equipment,
   selectedAnswer,
   showResult,
+  question,
+  options,
+  isLoadingQuestion,
   onClose,
   onAnswerSelect,
   onSubmit,
@@ -20,9 +25,7 @@ export default function QuestionDialog({
 }) {
   if (!equipment) return null;
 
-  const isCorrect =
-    selectedAnswer !== null &&
-    equipment.options[selectedAnswer]?.correct;
+  const isCorrect = showResult && selectedAnswer !== null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -39,33 +42,42 @@ export default function QuestionDialog({
 
         <div className="space-y-6 py-4">
           {/* Question */}
-          <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
-            <p className="text-lg leading-relaxed text-white">
-              {equipment.question}
-            </p>
-          </div>
-
-          {/* Options */}
-          {!showResult && (
-            <div className="space-y-3">
-              {equipment.options.map((option, index) => {
-                const isSelected = selectedAnswer === index;
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => onAnswerSelect(index)}
-                    className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
-                      isSelected
-                        ? "border-cyan-500 bg-cyan-500/10"
-                        : "border-white/10 bg-zinc-950/50 hover:border-cyan-500/50 hover:bg-zinc-900/50"
-                    }`}
-                  >
-                    <span className="text-white">{option.text}</span>
-                  </button>
-                );
-              })}
+          {isLoadingQuestion ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
             </div>
+          ) : (
+            <>
+              <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
+                <p className="text-lg leading-relaxed text-white">
+                  {question || "Memuat pertanyaan..."}
+                </p>
+              </div>
+
+              {/* Options */}
+              {!showResult && options.length > 0 && (
+                <div className="space-y-3">
+                  {options.map((option, index) => {
+                    const isSelected = selectedAnswer === index;
+                    const optionText = typeof option === "string" ? option : option.text || option;
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => onAnswerSelect(index, optionText)}
+                        className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
+                          isSelected
+                            ? "border-cyan-500 bg-cyan-500/10"
+                            : "border-white/10 bg-zinc-950/50 hover:border-cyan-500/50 hover:bg-zinc-900/50"
+                        }`}
+                      >
+                        <span className="text-white">{optionText}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
 
           {/* Result Display (only for correct answer) */}
@@ -86,10 +98,10 @@ export default function QuestionDialog({
           )}
 
           {/* Submit Button */}
-          {!showResult && (
+          {!showResult && !isLoadingQuestion && (
             <Button
               onClick={onSubmit}
-              disabled={selectedAnswer === null}
+              disabled={selectedAnswer === null || options.length === 0}
               className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 py-6 text-base font-semibold text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 disabled:opacity-50"
             >
               Submit Jawaban
