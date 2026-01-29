@@ -1,7 +1,6 @@
 import { createAxiosInstance } from "./axiosInstances";
 import { createHandleRequest } from "./interceptors";
 
-// Membuat Axios instance dengan konfigurasi global
 const handleRequest = createHandleRequest();
 const axiosInstance = createAxiosInstance();
 
@@ -17,6 +16,8 @@ export const user = {
     handleRequest(
       axiosInstance.get("/api/user/check-status-pembayaran", { params: user_id })
     ),
+
+  getUserInfo: () => handleRequest(axiosInstance.get("/api/user/get-user-info")),
 };
 
 export const penpos = {
@@ -71,23 +72,22 @@ export const battleAbn = {
 };
 
 export const admin = {
-  // Ambil semua tim
   getAllTeams: () =>
     handleRequest(axiosInstance.get("/api/admin/get-all-teams")),
 
-  // Ambil detail tim
   getTeamDetail: (teamId) =>
     handleRequest(axiosInstance.get(`/api/admin/get-team-detail/${teamId}`)),
   verifyTeam: (teamId, status) => {
-    // 1. Buat FormData
     const formData = new FormData();
     formData.append("status", status);
 
-    // 2. Kirim FormData (Header akan otomatis diatur oleh Axios)
     return handleRequest(
       axiosInstance.put(`/api/admin/verify-payment/${teamId}`, formData)
     );
   },
+
+  getLeaderBoard: () =>
+    handleRequest(axiosInstance.get("/api/admin/leaderboard")),
 };
 
 export const sortTheProcess = {

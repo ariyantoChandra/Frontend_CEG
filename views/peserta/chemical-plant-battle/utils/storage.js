@@ -59,3 +59,12 @@ export const getEquipmentSequence = () => {
     return null;
   }
 };
+
+export const clearAllGameData = () => {
+  Object.values(STORAGE_KEYS).forEach((key) => {
+    localStorage.removeItem(key);
+  });
+  
+  localStorage.removeItem("gameStatus");
+  localStorage.removeItem("game_data");
+};

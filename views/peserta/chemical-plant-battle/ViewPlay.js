@@ -1,25 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import * as API from "@/core/services/api";
 import { useCountdown } from "./hooks/useCountdown";
 import { useGameState } from "./hooks/useGameState";
-import { ERROR_TYPES, TOTAL_EQUIPMENT_COUNT } from "./constants/gameConfig";
-import { clearGameStarted } from "./utils/storage";
+import { clearGameStarted, clearAllGameData, getEquipmentSequence } from "./utils/storage";
 import { getGameSessionId } from "./utils/getGameSessionId";
 import { mapEquipmentData } from "./utils/mapEquipmentData";
 import GameHeader from "./_components/GameHeader";
 import EquipmentCard from "./_components/EquipmentCard";
 import WelcomeDialog from "./_components/WelcomeDialog";
-import ErrorDialog from "./_components/ErrorDialog";
 import QuestionDialog from "./_components/QuestionDialog";
+import GameCompletionDialog from "./_components/GameCompletionDialog";
 import CountdownOverlay from "./_components/CountdownOverlay";
 import BackgroundEffects from "./_components/BackgroundEffects";
 
 export default function ViewPlay() {
-  const { countdown, startCountdown, isActive: isCountdownActive } = useCountdown();
+  const router = useRouter();
   const gameSessionId = getGameSessionId();
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
 
   const { data: apiResponse, error, isLoading } = useSWR(
     gameSessionId ? ["chemical-plant-battle-tools-play", gameSessionId] : null,
@@ -52,8 +53,7 @@ export default function ViewPlay() {
     showResult,
     showWelcomeDialog,
     welcomeEquipmentName,
-    showErrorDialog,
-    errorType,
+    errorMessage,
     completedEquipments,
     nextTargetId,
     isDialogOpen,
@@ -66,21 +66,31 @@ export default function ViewPlay() {
     handleAnswerSelect,
     handleSubmitAnswer,
     handleAnswerCorrect,
-    showError,
-    closeErrorDialog,
+    clearErrorMessage,
   } = useGameState(equipmentList);
 
+  const { countdown, startCountdown, isActive: isCountdownActive } = useCountdown(() => {
+    clearErrorMessage();
+  });
+
   useEffect(() => {
-    if (completedEquipments.length === TOTAL_EQUIPMENT_COUNT && equipmentList.length > 0) {
+    const sequence = getEquipmentSequence();
+    if ((!sequence || sequence.length === 0) && equipmentList.length > 0) {
       clearGameStarted();
+      setShowCompletionDialog(true);
     }
   }, [completedEquipments, equipmentList.length]);
+
+  const handleExit = () => {
+    clearAllGameData();
+    router.push("/rally");
+  };
 
   const handleCardClick = (equipment) => {
     if (isCountdownActive) return;
 
     const isValid = handleEquipmentClick(equipment, () => {
-      showError(ERROR_TYPES.EQUIPMENT);
+      startCountdown();
     });
 
     if (!isValid) {
@@ -90,16 +100,12 @@ export default function ViewPlay() {
 
   const handleSubmit = () => {
     const isValid = handleSubmitAnswer(() => {
-      showError(ERROR_TYPES.ANSWER);
+      startCountdown();
     });
 
     if (!isValid) {
       setIsDialogOpen(false);
     }
-  };
-
-  const handleErrorClose = () => {
-    closeErrorDialog(startCountdown);
   };
 
   const handleDialogClose = () => {
@@ -146,7 +152,6 @@ export default function ViewPlay() {
             <EquipmentCard
               key={equipment.id}
               equipment={equipment}
-              isCompleted={completedEquipments.includes(equipment.id)}
               isDisabled={isCountdownActive}
               onClick={handleCardClick}
             />
@@ -158,12 +163,6 @@ export default function ViewPlay() {
         isOpen={showWelcomeDialog && !isCountdownActive}
         equipmentName={welcomeEquipmentName}
         onClose={() => setShowWelcomeDialog(false)}
-      />
-
-      <ErrorDialog
-        isOpen={showErrorDialog && !isCountdownActive}
-        errorType={errorType}
-        onClose={handleErrorClose}
       />
 
       <QuestionDialog
@@ -180,7 +179,12 @@ export default function ViewPlay() {
         onNext={handleAnswerCorrect}
       />
 
-      <CountdownOverlay countdown={countdown} />
+      <GameCompletionDialog
+        isOpen={showCompletionDialog}
+        onExit={handleExit}
+      />
+
+      <CountdownOverlay countdown={countdown} errorMessage={errorMessage} />
     </div>
   );
 }

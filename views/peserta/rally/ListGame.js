@@ -9,6 +9,8 @@ import {
     Gamepad2,
     ArrowRight,
     RefreshCw,
+    Coins,
+    Trophy,
 } from "lucide-react";
 import useSWR from "swr";
 import { Input } from "@/components/ui/input";
@@ -87,6 +89,27 @@ export default function ListGame() {
         }
     );
 
+    const {
+        data: userInfoData,
+        error: userInfoError,
+        isLoading: isLoadingUserInfo,
+    } = useSWR(
+        ["userInfo"],
+        async () => {
+            try {
+                const response = await API.user.getUserInfo();
+                return response?.data || null;
+            } catch (err) {
+                console.error("Fetch user info error:", err);
+                throw err;
+            }
+        }
+    );
+
+    const userInfo = userInfoData?.data || null;
+    const points = userInfo?.points || 0;
+    const koin = userInfo?.koin || 0;
+
     const posts = Array.isArray(data?.data) ? data.data : [];
     const filteredPosts = posts.filter((post) =>
         post.name_pos.toLowerCase().includes(searchQuery.toLowerCase())
@@ -121,6 +144,21 @@ export default function ListGame() {
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-7xl mx-auto relative z-10 space-y-8">
+                {!isLoadingUserInfo && userInfo && (
+                    <div className="flex items-center gap-4 justify-start">
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm">
+                            <Trophy className="h-5 w-5 text-yellow-400" />
+                            <span className="text-zinc-300 font-medium">Points:</span>
+                            <span className="text-yellow-400 font-bold text-lg">{points}</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm">
+                            <Coins className="h-5 w-5 text-emerald-400" />
+                            <span className="text-zinc-300 font-medium">Koin:</span>
+                            <span className="text-emerald-400 font-bold text-lg">{koin}</span>
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">

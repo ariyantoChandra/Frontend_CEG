@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { admin } from "@/core/services/api"; // Import API admin
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Trophy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ export default function AdminDashboard() {
     try {
       const res = await admin.getAllTeams();
 
-      // Mengambil data dari res.data.data
       if (res.data && res.data.data) {
         setTeams(res.data.data);
       } else {
@@ -40,13 +39,13 @@ export default function AdminDashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
-    localStorage.removeItem("user_id")
-    // Hapus cookie jika pakai cookie storage juga
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("gameStatus");
+    localStorage.removeItem("game_data");
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    router.push("/login");
+    router.replace("/");
   };
 
-  // Filter pencarian sederhana
   const filteredTeams = teams.filter((t) =>
     t.nama_tim.toLowerCase().includes(search.toLowerCase())
   );
@@ -62,7 +61,6 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Dashboard */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h1 className="text-3xl font-black text-teal-900">
@@ -83,13 +81,19 @@ export default function AdminDashboard() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
+            <Button
+              onClick={() => router.push("/leaderboard")}
+              className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              Leaderboard
+            </Button>
             <Button onClick={handleLogout} variant="destructive">
               Logout
             </Button>
           </div>
         </div>
 
-        {/* Grid Kartu Tim */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTeams.map((team) => (
             <Card
@@ -103,7 +107,6 @@ export default function AdminDashboard() {
                     {team.nama_tim}
                   </CardTitle>
 
-                  {/* Badge Status Pembayaran */}
                   {team.status_pembayaran === "verified" ? (
                     <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-0 shrink-0">
                       Verified
@@ -123,19 +126,16 @@ export default function AdminDashboard() {
                     <span className="truncate">{team.asal_sekolah}</span>
                   </p>
 
-                  {/* === BAGIAN BARU: LABEL PAKET === */}
                   <div className="flex items-center gap-2">
                     <span className="font-semibold min-w-[70px]">Paket:</span>
                     <Badge
                       className={
-                        // Logika Warna: Ungu (Bundle), Biru (Single)
                         team.paket &&
                           team.paket.toLowerCase().includes("bundle")
                           ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-0"
                           : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-0"
                       }
                     >
-                      {/* Tampilkan uppercase biar rapi */}
                       {team.paket ? team.paket.toUpperCase() : "SINGLE"}
                     </Badge>
                   </div>

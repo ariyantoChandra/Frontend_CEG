@@ -45,7 +45,6 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // Hanya jalankan observer di homepage
     if (pathname !== "/") return;
 
     const sectionToNavMap = {
@@ -69,7 +68,7 @@ export default function Navbar() {
       },
       {
         root: null,
-        rootMargin: "-40% 0px -40% 0px", // fokus tengah layar
+        rootMargin: "-40% 0px -40% 0px", 
         threshold: 0,
       }
     );
@@ -84,7 +83,6 @@ export default function Navbar() {
 
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
-  // Gunakan absolute path '/' agar bisa diakses dari halaman lain (dashboard/admin)
   const navLinks = [
     { href: "/#home", label: "Home", id: "home" },
     { href: "/#pre-event", label: "Pre Event", id: "pre-event" },
@@ -96,16 +94,16 @@ export default function Navbar() {
     dispatch(logoutUser());
     localStorage.removeItem("user_id");
     localStorage.removeItem("role");
-    // Delete cookies
+    localStorage.removeItem("gameStatus");
+    localStorage.removeItem("game_data");
     if (typeof document !== "undefined") {
       document.cookie = "token=; path=/; max-age=0";
       document.cookie = "settings=; path=/; max-age=0";
     }
-    router.push("/");
+    router.replace("/");
   };
 
   const handleScroll = (e, href) => {
-    // Jika sedang di homepage, lakukan smooth scroll
     if (pathname === '/' && href.startsWith('/#')) {
       e.preventDefault();
       const id = href.replace("/#", "");
@@ -116,7 +114,6 @@ export default function Navbar() {
         el.scrollIntoView({ behavior: "smooth" });
       }
     }
-    // Jika di halaman lain, Link akan menangani navigasi secara default ke '/'
     setMobileMenuOpen(false);
   };
 
@@ -137,12 +134,10 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
 
-          {/* LOGO */}
           <Link href="/" className="flex items-center gap-3">
             <Image src="/Asset/CEG HOMEPAGE.png" alt="CEG" width={100} height={100} />
           </Link>
 
-          {/* NAV LINKS DESKTOP */}
           {!isAuthPage && (
             <div className="hidden md:flex items-center gap-10">
               {navLinks.map((link) => {
@@ -165,7 +160,6 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* ACTION BUTTON DESKTOP */}
           <div className="hidden md:flex items-center gap-4">
             {!isMounted ? null : token ? (
               <>
@@ -215,14 +209,12 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* MOBILE TOGGLE */}
           <Button variant="ghost" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </Button>
         </div>
       </div>
 
-      {/* MOBILE MENU */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white/95 backdrop-blur-2xl p-6 space-y-4 border-b border-teal-100 animate-in slide-in-from-top duration-300">
           {!isAuthPage && navLinks.map((link) => (
@@ -236,7 +228,6 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* AUTH BUTTON MOBILE */}
           {!isMounted ? null : token ? (
             <div className="pt-4 border-t border-teal-200 space-y-3">
               {role !== "ADMIN" ? (

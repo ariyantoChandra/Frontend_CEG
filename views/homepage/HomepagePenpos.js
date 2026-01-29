@@ -45,7 +45,10 @@ export default function HomePagePenpos() {
         dispatch(clearRole());
         dispatch(clearToken());
         localStorage.removeItem("selectedTeams");
-        toast.promise(router.push("/login"), {
+        localStorage.removeItem("gameStatus");
+        localStorage.removeItem("game_data");
+        localStorage.removeItem("pos_type");
+        toast.promise(router.replace("/"), {
             loading: "Logout...",
             success: "Berhasil logout.",
             error: "Gagal logout.",

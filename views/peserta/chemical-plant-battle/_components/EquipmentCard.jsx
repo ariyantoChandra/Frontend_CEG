@@ -1,11 +1,9 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
 import { colorClasses } from "../utils/colorClasses";
 
 export default function EquipmentCard({
   equipment,
-  isCompleted,
   isDisabled,
   onClick,
 }) {
@@ -13,17 +11,12 @@ export default function EquipmentCard({
 
   return (
     <Card
-      className={`group relative border-2 ${colorClass.border} ${colorClass.bg} backdrop-blur-xl transition-all ${isDisabled || isCompleted
+      className={`group relative border-2 ${colorClass.border} ${colorClass.bg} backdrop-blur-xl transition-all ${isDisabled
         ? "cursor-not-allowed opacity-50"
         : `cursor-pointer ${colorClass.hover} hover:shadow-lg`
         }`}
-      onClick={() => !isDisabled && !isCompleted && onClick(equipment)}
+      onClick={() => !isDisabled && onClick(equipment)}
     >
-      {isCompleted && (
-        <div className="absolute right-2 top-2 z-10">
-          <CheckCircle2 className="h-6 w-6 text-emerald-400" />
-        </div>
-      )}
 
       <CardContent className="flex flex-col items-center justify-center p-8">
         {equipment.image && (

@@ -2,14 +2,9 @@ import { useState, useEffect } from "react";
 import { COUNTDOWN_DURATION } from "../constants/gameConfig";
 import { getSavedCountdown, saveCountdown, clearCountdown } from "../utils/storage";
 
-/**
- * Custom hook for managing countdown timer with localStorage persistence
- * @returns {Object} { countdown, startCountdown, isActive }
- */
-export const useCountdown = () => {
+export const useCountdown = (onCountdownEnd) => {
   const [countdown, setCountdown] = useState(0);
 
-  // Initialize countdown from localStorage on mount
   useEffect(() => {
     const saved = getSavedCountdown();
     if (saved > 0) {
@@ -17,7 +12,6 @@ export const useCountdown = () => {
     }
   }, []);
 
-  // Countdown timer effect
   useEffect(() => {
     if (countdown > 0) {
       const timer = setInterval(() => {
@@ -27,6 +21,9 @@ export const useCountdown = () => {
 
           if (newCountdown <= 0) {
             clearCountdown();
+            if (onCountdownEnd) {
+              onCountdownEnd();
+            }
             return 0;
           }
           return newCountdown;
@@ -35,7 +32,7 @@ export const useCountdown = () => {
 
       return () => clearInterval(timer);
     }
-  }, [countdown]);
+  }, [countdown, onCountdownEnd]);
 
   const startCountdown = () => {
     setCountdown(COUNTDOWN_DURATION);

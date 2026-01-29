@@ -10,9 +10,6 @@ const ROLE_HOME = {
     ADMIN: "/admin",
 };
 
-/**
- * Client-side guard to keep users within their allowed routes.
- */
 export const useRoleGuard = ({
     allowedRoles,
     fallbackWhenNoRole = "/login",
@@ -30,7 +27,15 @@ export const useRoleGuard = ({
 
         if (!resolvedRole) {
             if (fallbackWhenNoRole) {
-                router.replace(`${fallbackWhenNoRole}?from=${encodeURIComponent(pathname)}`);
+                const isProtectedRoute = pathname.startsWith("/pos") || 
+                                        pathname.startsWith("/admin") || 
+                                        pathname.startsWith("/rally");
+                
+                if (isProtectedRoute && fallbackWhenNoRole === "/login") {
+                    router.replace("/");
+                } else {
+                    router.replace(`${fallbackWhenNoRole}?from=${encodeURIComponent(pathname)}`);
+                }
             }
             return;
         }

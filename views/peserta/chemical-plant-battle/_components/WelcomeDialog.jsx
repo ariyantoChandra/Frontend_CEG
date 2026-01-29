@@ -13,10 +13,10 @@ export default function WelcomeDialog({ isOpen, onClose, equipmentName }) {
       <AlertDialogContent className="border-white/10 bg-zinc-900/95 backdrop-blur-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl text-white">
-            {equipmentName || "Alat"} mengalami masalah !!!!!
+            {equipmentName || "Alat"} mengalami masalah !
           </AlertDialogTitle>
           <AlertDialogDescription className="text-zinc-300">
-            Silakan pilih peralatan yang tepat untuk memulai permainan
+            Silakan pilih peralatan yang sesuai
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex justify-end">

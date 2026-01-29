@@ -11,8 +11,7 @@ export const useGameState = (equipmentList = []) => {
   const [showResult, setShowResult] = useState(false);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [welcomeEquipmentName, setWelcomeEquipmentName] = useState(null);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorType, setErrorType] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [completedEquipments, setCompletedEquipments] = useState([]);
   const [nextTargetId, setNextTargetId] = useState(INITIAL_TARGET_ID);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -65,7 +64,7 @@ export const useGameState = (equipmentList = []) => {
     const currentTargetId = sequence && sequence.length > 0 ? sequence[0] : nextTargetId;
     
     if (equipment.id !== currentTargetId) {
-      setErrorType("equipment");
+      setErrorMessage("Alat yang kamu pilih salah");
       onError();
       return false;
     }
@@ -126,11 +125,11 @@ export const useGameState = (equipmentList = []) => {
         toolId: selectedEquipment.id,
       });
 
-      const isCorrect = response?.data?.success && response?.data?.data?.is_correct;
+      const isCorrect = response?.data?.success && response?.data?.data?.correct === true;
 
       if (!isCorrect) {
         resetQuestionState();
-        setErrorType("answer");
+        setErrorMessage("Jawaban yang kamu pilih salah");
         onError();
         return false;
       }
@@ -140,7 +139,7 @@ export const useGameState = (equipmentList = []) => {
     } catch (err) {
       console.error("Error submitting answer:", err);
       resetQuestionState();
-      setErrorType("answer");
+      setErrorMessage("Jawaban yang kamu pilih salah");
       onError();
       return false;
     }
@@ -172,14 +171,8 @@ export const useGameState = (equipmentList = []) => {
     }
   };
 
-  const showError = (type) => {
-    setErrorType(type);
-    setShowErrorDialog(true);
-  };
-
-  const closeErrorDialog = (onCountdownStart) => {
-    setShowErrorDialog(false);
-    onCountdownStart();
+  const clearErrorMessage = () => {
+    setErrorMessage(null);
   };
 
   return {
@@ -189,8 +182,7 @@ export const useGameState = (equipmentList = []) => {
     showResult,
     showWelcomeDialog,
     welcomeEquipmentName,
-    showErrorDialog,
-    errorType,
+    errorMessage,
     completedEquipments,
     nextTargetId,
     isDialogOpen,
@@ -207,8 +199,7 @@ export const useGameState = (equipmentList = []) => {
     handleAnswerSelect,
     handleSubmitAnswer,
     handleAnswerCorrect,
-    showError,
-    closeErrorDialog,
+    clearErrorMessage,
     resetQuestionState,
   };
 };
