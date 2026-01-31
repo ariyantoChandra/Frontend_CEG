@@ -26,7 +26,7 @@ const ProcessBox = memo(({ slotId, label, placedItem, items, onItemClick, isWide
         <span className="text-xl sm:text-2xl">🔧</span>
       </div>
       <span className="text-xs sm:text-sm font-semibold text-white text-center px-2">
-        {placedItem.name}
+        {placedItem?.name}
       </span>
       <span className="text-[10px] sm:text-xs text-zinc-400">
         {disabled ? 'Tidak dapat diubah' : 'Klik untuk mengganti'}
@@ -73,7 +73,7 @@ const ProcessBox = memo(({ slotId, label, placedItem, items, onItemClick, isWide
             key={item.id}
             onClick={() => onItemClick(item.id, slotId)}
           >
-            {item.name}
+            {item?.name}
             {placedItem?.id === item.id && (
               <CheckCircle2 className="ml-auto h-4 w-4" />
             )}

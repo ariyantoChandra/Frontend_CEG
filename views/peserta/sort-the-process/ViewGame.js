@@ -61,7 +61,7 @@ export default function ViewGame() {
         {selectedQuestion && (
           <Card className="mb-4 sm:mb-8 border-white/10 bg-zinc-900/40 backdrop-blur-xl">
             <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
-              <p className="text-sm sm:text-base text-white">{selectedQuestion.name}</p>
+              <p className="text-sm sm:text-base text-white">{selectedQuestion?.name}</p>
             </CardContent>
           </Card>
         )}
