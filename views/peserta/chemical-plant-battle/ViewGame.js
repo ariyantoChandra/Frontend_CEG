@@ -35,7 +35,7 @@ export default function ViewGame() {
 
   useEffect(() => {
     if (hasGameStarted()) {
-      router.push("chemicalplantbattle/play");
+      router.push("chemical-plant-battle/play");
     }
   }, [router]);
 

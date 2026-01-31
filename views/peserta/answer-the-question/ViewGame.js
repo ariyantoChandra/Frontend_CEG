@@ -266,14 +266,6 @@ export default function ViewGame() {
             </h1>
             <span className="text-zinc-500">| Soal {currentPage}/20</span>
           </div>
-          <Button
-            onClick={handleExit}
-            variant="outline"
-            className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Keluar
-          </Button>
         </div>
 
         <div className="mb-8 rounded-lg border border-white/10 bg-zinc-900/50 p-6 shadow-lg">

@@ -4,6 +4,7 @@ import Providers from "@/core/store/Providers";
 import Loader from "@/components/shared/Loader";
 import GameStatusGuard from "@/components/shared/GameStatusGuard";
 import MaskotsplashScreen from "@/components/shared/MaskotsplashScreen";
+import AuthSync from "@/components/shared/AuthSync";
 import { Suspense } from "react";
 
 export const metadata = {
@@ -16,7 +17,8 @@ export default function RootLayout({ children }) {
     <html lang="id">
       <body className="bg-zinc-950 text-white antialiased">
         <Providers>
-          <MaskotsplashScreen />
+          <AuthSync />
+          {/* <MaskotsplashScreen /> */}
           <GameStatusGuard>
             <Suspense fallback={<Loader />}>
               {children}

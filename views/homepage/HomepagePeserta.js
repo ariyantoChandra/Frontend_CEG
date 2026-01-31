@@ -6,8 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Instagram, Phone } from "lucide-react";
 import { SiLine } from "react-icons/si";
-
-// IMPORT REDUX HOOK UNTUK CEK LOGIN
+    
 import { useAppSelector } from "@/core/store/hooks";
 
 const images = [
@@ -27,7 +26,6 @@ export default function HomepagePeserta() {
     const [active, setActive] = useState(1);
     const [isMobile, setIsMobile] = useState(false);
 
-    // AMBIL TOKEN DARI REDUX STORE
     const token = useAppSelector((state) => state.token.token);
 
     useEffect(() => {
@@ -100,7 +98,6 @@ export default function HomepagePeserta() {
                             </p>
                         </div>
 
-                        {/* LOGIKA TOMBOL: Jika Token Ada (Login) -> Dashboard, Jika Tidak -> Register */}
                         <div className="flex flex-col sm:flex-row gap-4">
                             {!token && (
                                 <Button asChild className="bg-teal-800 hover:bg-teal-900 text-white px-12 py-7 rounded-full text-xl font-bold shadow-lg transition-transform hover:scale-105">
@@ -137,7 +134,9 @@ export default function HomepagePeserta() {
                                         fill
                                         className="object-cover rounded-[25px]"
                                         loading={isActive ? "eager" : "lazy"}
-                                        sizes="(max-width: 768px) 90vw, 500px"
+                                        priority={isActive && idx === active}
+                                        sizes="(max-width: 768px) 90vw, (max-width: 1024px) 500px, 380px"
+                                        quality={isActive ? 85 : 75}
                                     />
                                 </div>
                             ))}
@@ -161,6 +160,8 @@ export default function HomepagePeserta() {
                                     className="w-full h-auto object-contain"
                                     draggable={false}
                                     loading="lazy"
+                                    sizes="(max-width: 768px) 100vw, 800px"
+                                    quality={85}
                                 />
                             </div>
                             <div className="bg-white/40 backdrop-blur-sm rounded-[25px] p-6 md:p-8 shadow-lg w-full border border-white/20">
@@ -191,6 +192,8 @@ export default function HomepagePeserta() {
                                 className="w-full h-auto drop-shadow-2xl object-contain"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="(max-width: 768px) 100vw, 500px"
+                                quality={80}
                             />
                         </div>
                     </div>
@@ -208,6 +211,8 @@ export default function HomepagePeserta() {
                                 className="drop-shadow-2xl w-[200px] md:w-[350px] h-auto object-contain"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="(max-width: 768px) 200px, 350px"
+                                quality={75}
                             />
                         </div>
                         <div className="relative w-full mb-10 md:mb-20">
@@ -219,6 +224,8 @@ export default function HomepagePeserta() {
                                 className="w-full h-auto drop-shadow-2xl"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="100vw"
+                                quality={75}
                             />
                         </div>
                     </div>
@@ -232,6 +239,8 @@ export default function HomepagePeserta() {
                                 className="drop-shadow-2xl w-[280px] md:w-[550px] h-auto object-contain"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="(max-width: 768px) 280px, 550px"
+                                quality={75}
                             />
                         </div>
                         <div className="relative w-full">
@@ -243,6 +252,8 @@ export default function HomepagePeserta() {
                                 className="w-full h-auto drop-shadow-2xl"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="100vw"
+                                quality={75}
                             />
                         </div>
                     </div>
@@ -256,6 +267,8 @@ export default function HomepagePeserta() {
                                 className="drop-shadow-2xl w-[280px] md:w-[550px] h-auto object-contain"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="(max-width: 768px) 280px, 550px"
+                                quality={75}
                             />
                         </div>
                         <div className="relative w-full">
@@ -267,6 +280,8 @@ export default function HomepagePeserta() {
                                 className="w-full h-auto drop-shadow-2xl"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="100vw"
+                                quality={75}
                             />
                         </div>
                     </div>
@@ -283,10 +298,11 @@ export default function HomepagePeserta() {
                             className="drop-shadow-2xl w-[220px] md:w-[400px] h-auto object-contain"
                             draggable={false}
                             loading="lazy"
+                            sizes="(max-width: 768px) 220px, 400px"
+                            quality={75}
                         />
                     </div>
 
-                    {/* === TAMBAHAN PRICE LIST DI SINI === */}
                     <div className="flex flex-col md:flex-row gap-6 my-8 z-10 px-4 w-full justify-center">
                         <div className="bg-white/40 backdrop-blur-md border border-white/50 p-6 rounded-2xl text-center shadow-lg transform hover:scale-105 transition-transform w-full md:w-64">
                             <h3 className="text-teal-900 font-bold text-xl mb-1">EARLY BIRD</h3>
@@ -318,6 +334,8 @@ export default function HomepagePeserta() {
                             className="w-full h-auto drop-shadow-2xl"
                             draggable={false}
                             loading="lazy"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 1200px"
+                            quality={75}
                         />
                     </div>
                 </section>
@@ -333,6 +351,8 @@ export default function HomepagePeserta() {
                             className="drop-shadow-2xl w-[260px] md:w-[450px] h-auto object-contain"
                             draggable={false}
                             loading="lazy"
+                            sizes="(max-width: 768px) 260px, 450px"
+                            quality={75}
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
@@ -345,6 +365,8 @@ export default function HomepagePeserta() {
                                 className="mb-6 group-hover:scale-105 transition-transform duration-200 will-change-transform"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="150px"
+                                quality={80}
                             />
                             <h3 className="text-2xl font-black text-teal-800 mb-2">Booklet Peserta</h3>
                             <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">Informasi mendalam mengenai pendaftaran dan aturan.</p>
@@ -361,6 +383,8 @@ export default function HomepagePeserta() {
                                 className="mb-6 group-hover:scale-105 transition-transform duration-200 will-change-transform"
                                 draggable={false}
                                 loading="lazy"
+                                sizes="150px"
+                                quality={80}
                             />
                             <h3 className="text-2xl font-black text-teal-800 mb-2">SOP Lomba</h3>
                             <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">Panduan operasional selama hari-H kompetisi.</p>
@@ -382,6 +406,8 @@ export default function HomepagePeserta() {
                             className="drop-shadow-2xl w-full md:w-[700px] h-auto object-contain"
                             draggable={false}
                             loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 700px"
+                            quality={75}
                         />
                     </div>
                     <div className="grid gap-4 w-full">
@@ -446,25 +472,25 @@ export default function HomepagePeserta() {
                         </h3>
                         <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-7 gap-3 pb-10 md:gap-4 items-center justify-items-center">
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/logoEJT.png" alt="Event Jawa Timur" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/logoEJT.png" alt="Event Jawa Timur" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/logolombasma.png" alt="Lomba SMA" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/logolombasma.png" alt="Lomba SMA" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/eventpelajar.jpg" alt="Event Pelajar" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/eventpelajar.jpg" alt="Event Pelajar" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/infolomba.png" alt="Info Lomba" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/infolomba.png" alt="Info Lomba" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/pointkampus.png" alt="Point Kampus" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/pointkampus.png" alt="Point Kampus" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/katalogevent.png" alt="Katalog Event Indonesia" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/katalogevent.png" alt="Katalog Event Indonesia" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/partnerevent.png" alt="Partner Event" fill className="object-contain p-2" draggable={false} loading="lazy" />
+                                <Image src="/Asset/medpar/partnerevent.png" alt="Partner Event" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
                             </div>
                         </div>
                     </div>

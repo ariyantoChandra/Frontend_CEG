@@ -129,10 +129,10 @@ export default function ListGame() {
                 toast.success("Berhasil bergabung ke pos permainan!");
                 router.push(`/rally/${post.penpos_id}/waiting-list`);
             } else {
-                toast.error("Response tidak valid dari server");
+                toast.error(response?.data?.message);
             }
         } catch (err) {
-            toast.error("Gagal bergabung ke pos permainan. Silakan coba lagi.");
+            toast.error(err.response?.data?.message);
         } finally {
             setLoadingPostId(null);
         }

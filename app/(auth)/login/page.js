@@ -43,14 +43,24 @@ export default function LoginPage() {
         const role = response?.data?.data?.role;
 
         if (access_token) {
-          dispatch(setToken({ token: access_token }));
+          const expiresIn = 7 * 24 * 60 * 60;
+          dispatch(setToken({ token: access_token, expiresIn }));
           dispatch(setUser(username));
           dispatch(setRole(role));
           localStorage.setItem("user_id", response?.data?.data?.id);
+          localStorage.setItem("role", role);
           toast.success(`Selamat datang, ${username || 'User'}!`);
-          if (role === 'PESERTA') router.push('/');
-          else if (role === 'ADMIN') router.push('/admin');
-          else if (role === 'PENPOS') router.push('/pos');
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          const fromPath = urlParams.get('from');
+          
+          if (fromPath && fromPath.startsWith('/')) {
+            router.push(fromPath);
+          } else {
+            if (role === 'PESERTA') router.push('/');
+            else if (role === 'ADMIN') router.push('/admin');
+            else if (role === 'PENPOS') router.push('/pos');
+          }
         }
       } catch (error) {
         toast.error(error?.response?.data?.message || 'Login gagal');
@@ -96,7 +106,10 @@ export default function LoginPage() {
 
           {/* Form Container */}
           <div className="w-full max-w-[320px] md:max-w-md">
-            <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }} className="space-y-3 md:space-y-4">
               
               {/* USERNAME */}
               <div className="group space-y-1">

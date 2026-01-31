@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/core/store/hooks";
 import { penpos } from "@/core/services/api";
@@ -23,6 +23,7 @@ import SubmitButtonSection from "@/components/shared/penpos/SubmitButtonSection"
 export default function PostResultPage() {
     const router = useRouter();
     const userPenpos = useAppSelector((state) => state.user.userPenpos);
+    const navigationBlockedRef = useRef(false);
 
     const { data: currentTeamsData, error: fetchError, isLoading } = useSWR(
         userPenpos ? ["getCurrentTeams", userPenpos] : null,
@@ -42,6 +43,8 @@ export default function PostResultPage() {
     const [submitting, setSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [error, setError] = useState(null);
+    const [validationWarning, setValidationWarning] = useState(null);
+    const [canNavigate, setCanNavigate] = useState(false);
 
     useEffect(() => {
         const storedPosType = localStorage.getItem("pos_type");
@@ -61,27 +64,93 @@ export default function PostResultPage() {
         }
     }, [currentTeamsData]);
 
-    const handleTeam1StatusChange = (status) => {
-        setGameResults((prev) => ({
-            ...prev,
-            team1: { ...prev.team1, status },
-        }));
-    };
-
-    const handleTeam2StatusChange = (status) => {
-        setGameResults((prev) => ({
-            ...prev,
-            team2: { ...prev.team2, status },
-        }));
-    };
-
-    const isValid = () => {
+    const isValid = useCallback(() => {
         const posType = localStorage.getItem("pos_type") || posInfo.type || DEFAULT_POS_TYPE;
 
         if (posType === "SINGLE") {
             return gameResults.team1.status !== "";
         }
-        return gameResults.team1.status !== "" && gameResults.team2?.status !== "";
+        
+        if (gameResults.team1.status === "" || gameResults.team2?.status === "") {
+            return false;
+        }
+        
+        const winCount = [gameResults.team1.status, gameResults.team2?.status].filter(s => s === "WIN").length;
+        return winCount <= 1;
+    }, [gameResults, posInfo.type]);
+
+    useEffect(() => {
+        if (submitSuccess || canNavigate) {
+            navigationBlockedRef.current = false;
+            return;
+        }
+
+        navigationBlockedRef.current = !isValid();
+
+        const handlePopState = (e) => {
+            if (navigationBlockedRef.current) {
+                window.history.pushState(null, "", window.location.href);
+                toast.warning("Silakan pilih status menang/kalah untuk semua tim terlebih dahulu sebelum kembali.");
+            }
+        };
+
+        const handleBeforeUnload = (e) => {
+            if (navigationBlockedRef.current) {
+                e.preventDefault();
+                e.returnValue = "Anda harus memilih status menang/kalah untuk semua tim terlebih dahulu. Apakah Anda yakin ingin meninggalkan halaman ini?";
+                return e.returnValue;
+            }
+        };
+
+        window.history.pushState(null, "", window.location.href);
+        window.addEventListener("popstate", handlePopState);
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [submitSuccess, canNavigate, isValid]);
+
+
+    const handleTeam1StatusChange = (status) => {
+        setGameResults((prev) => {
+            const newResults = {
+                ...prev,
+                team1: { ...prev.team1, status },
+            };
+            
+            checkValidation(newResults);
+            
+            return newResults;
+        });
+    };
+
+    const handleTeam2StatusChange = (status) => {
+        setGameResults((prev) => {
+            const newResults = {
+                ...prev,
+                team2: { ...prev.team2, status },
+            };
+            
+            checkValidation(newResults);
+            
+            return newResults;
+        });
+    };
+
+    const checkValidation = (results) => {
+        const posType = localStorage.getItem("pos_type") || posInfo.type || DEFAULT_POS_TYPE;
+        
+        if (posType === "BATTLE" && results.team1.status && results.team2?.status) {
+            if (results.team1.status === "WIN" && results.team2.status === "WIN") {
+                setValidationWarning("Hanya satu tim yang boleh menang. Tidak boleh kedua tim menang bersamaan.");
+            } else {
+                setValidationWarning(null);
+            }
+        } else {
+            setValidationWarning(null);
+        }
     };
 
     const submitResults = async () => {
@@ -118,6 +187,10 @@ export default function PostResultPage() {
                     throw new Error("Status kedua tim harus diisi");
                 }
 
+                if (team1Status === "WIN" && team2Status === "WIN") {
+                    throw new Error("Hanya satu tim yang boleh menang. Tidak boleh kedua tim menang bersamaan.");
+                }
+
                 let tim_menang, tim_kalah;
 
                 if (team1Status === "WIN" && team2Status === "LOSE") {
@@ -126,8 +199,11 @@ export default function PostResultPage() {
                 } else if (team1Status === "LOSE" && team2Status === "WIN") {
                     tim_menang = gameResults.team2.teamId;
                     tim_kalah = gameResults.team1.teamId;
+                } else if (team1Status === "LOSE" && team2Status === "LOSE") {
+                    tim_menang = null;
+                    tim_kalah = null;
                 } else {
-                    throw new Error("Salah satu tim harus menang dan tim lainnya harus kalah");
+                    throw new Error("Status tidak valid");
                 }
 
                 resultPayload = {
@@ -144,6 +220,7 @@ export default function PostResultPage() {
             }
 
             setSubmitSuccess(true);
+            setCanNavigate(true);
             toast.success(response?.data?.message || "Hasil berhasil disimpan!");
 
             localStorage.removeItem("game_sessions_id");
@@ -170,14 +247,13 @@ export default function PostResultPage() {
 
     return (
         <div className="relative min-h-screen overflow-hidden bg-zinc-950 px-4 py-12">
-            {/* Background Effects */}
             <div className="absolute left-1/3 top-20 h-96 w-96 rounded-full bg-cyan-500/10 blur-[100px]"></div>
             <div className="absolute bottom-20 right-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-[100px]"></div>
 
             <div className="relative z-10 mx-auto max-w-5xl">
                 <HeaderSection posName={posInfo.name} />
 
-                <AlertMessages error={error} submitSuccess={submitSuccess} />
+                <AlertMessages error={error} submitSuccess={submitSuccess} validationWarning={validationWarning} />
 
                 <div className="space-y-6">
                     <TeamCardsSection

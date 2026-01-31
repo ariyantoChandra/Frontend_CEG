@@ -27,15 +27,7 @@ export const useRoleGuard = ({
 
         if (!resolvedRole) {
             if (fallbackWhenNoRole) {
-                const isProtectedRoute = pathname.startsWith("/pos") || 
-                                        pathname.startsWith("/admin") || 
-                                        pathname.startsWith("/rally");
-                
-                if (isProtectedRoute && fallbackWhenNoRole === "/login") {
-                    router.replace("/");
-                } else {
-                    router.replace(`${fallbackWhenNoRole}?from=${encodeURIComponent(pathname)}`);
-                }
+                router.replace(`${fallbackWhenNoRole}?from=${encodeURIComponent(pathname)}`);
             }
             return;
         }

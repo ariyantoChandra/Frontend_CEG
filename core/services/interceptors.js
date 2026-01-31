@@ -7,7 +7,6 @@ export const setupInterceptorsTo = (axiosInstance, options = {}) => {
         (config) => {
             try {
                 if (typeof window !== 'undefined') {
-                    // Prefer cookie, fallback to localStorage
                     const tokenFromCookie = document.cookie
                         ?.split('; ')
                         ?.find((c) => c.startsWith('token='))
@@ -32,12 +31,21 @@ export const setupInterceptorsTo = (axiosInstance, options = {}) => {
             const status = error?.response?.status;
             if (status === 401) {
                 if (typeof window !== 'undefined') {
-                    try {
-                        localStorage.removeItem('token');
-                        document.cookie = 'token=; path=/; max-age=0';
-                    } catch { }
-                    if (onUnauthorized) onUnauthorized();
-                    else window.location.replace('/login');
+                    const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+                    const isLoginRequest = error?.config?.url?.includes('/auth/login') || error?.config?.url?.includes('api/auth/login');
+                    
+                    if (!isLoginPage && !isLoginRequest) {
+                        try {
+                            localStorage.removeItem('token');
+                            localStorage.removeItem('role');
+                            localStorage.removeItem('user');
+                            localStorage.removeItem('user_id');
+                            localStorage.removeItem('userPenpos');
+                            document.cookie = 'token=; path=/; max-age=0';
+                        } catch { }
+                        if (onUnauthorized) onUnauthorized();
+                        else window.location.replace('/login');
+                    }
                 }
             }
             return Promise.reject(error);

@@ -11,14 +11,20 @@ export function proxy(req) {
     const token = cookies.get('token')?.value;
 
     if (!token && !isPublic) {
-        // If unauthenticated and route is protected, send to homepage
-        const url = new URL('/', req.url);
+        // If unauthenticated and route is protected, redirect to login with from parameter
+        const url = new URL('/login', req.url);
         url.searchParams.set('from', pathname);
         return NextResponse.redirect(url);
     }
 
     if (token && isAuthRoute) {
         // If already logged in, redirect away from auth pages
+        // Check if there's a 'from' parameter, redirect there if valid
+        const fromParam = nextUrl.searchParams.get('from');
+        if (fromParam && fromParam.startsWith('/')) {
+            return NextResponse.redirect(new URL(fromParam, req.url));
+        }
+        // Otherwise, redirect to homepage
         return NextResponse.redirect(new URL('/', req.url));
     }
 

@@ -68,7 +68,7 @@ export default function Navbar() {
       },
       {
         root: null,
-        rootMargin: "-40% 0px -40% 0px", 
+        rootMargin: "-40% 0px -40% 0px",
         threshold: 0,
       }
     );
@@ -118,7 +118,7 @@ export default function Navbar() {
   };
 
   const { data: statusPayment } = useSWR(
-    user_id ? ["get-status-payment", user_id] : null,
+    user_id && role !== "PENPOS" && role !== "ADMIN" ? ["get-status-payment", user_id] : null,
     async () => {
       const query = {
         user_id: user_id,
@@ -163,11 +163,11 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {!isMounted ? null : token ? (
               <>
-                {/* {role !== "ADMIN" && (
-                  <Button variant="ghost" className="font-bold text-teal-900 hover:bg-white/40" onClick={() => router.push('/rally')}>
+                {role === "PESERTA" && (
+                  <Button variant="outline" className="font-bold text-teal-900 hover:bg-white/40" onClick={() => router.push('/rally')}>
                     Rally
                   </Button>
-                )} */}
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-teal-800/30 text-teal-900 bg-white/40 rounded-full font-bold px-5">
@@ -183,7 +183,13 @@ export default function Navbar() {
                       </DropdownMenuItem>
                     )}
 
-                    {role !== "ADMIN" && (
+                    {role === "PENPOS" && (
+                      <DropdownMenuItem onClick={() => router.push("/pos")} className="cursor-pointer font-medium text-teal-900">
+                        Dashboard Penpos
+                      </DropdownMenuItem>
+                    )}
+
+                    {role === "PESERTA" && (
                       <DropdownMenuItem>
                         <Badge
                           className={`rounded-none font-bold shadow-lg text-sm ${statusPayment === "unverified" ? "text-white bg-yellow-300" : "text-white bg-green-500"}`}
@@ -209,9 +215,11 @@ export default function Navbar() {
             )}
           </div>
 
-          <Button variant="ghost" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </Button>
+          {!isAuthPage && (
+            <Button className="md:hidden bg-gray-400" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -230,25 +238,39 @@ export default function Navbar() {
 
           {!isMounted ? null : token ? (
             <div className="pt-4 border-t border-teal-200 space-y-3">
-              {role !== "ADMIN" ? (
+              {role === "PESERTA" && (
                 <>
                   <Badge
                     className={`py-2 rounded-none w-full font-bold shadow-lg text-sm ${statusPayment === "unverified" ? "text-white bg-yellow-300" : statusPayment === "verified" ? "text-white bg-green-500" : "text-white bg-yellow-500"}`}
                   >
                     {statusPayment === "unverified" ? "Menunggu Terverifikasi" : statusPayment === "verified" ? "Terverifikasi" : "Menunggu Verifikasi"}
                   </Badge>
-                  {/* <Button
-                    variant="ghost"
-                    className="w-full font-bold text-teal-900"
+                  <div className="border-t"></div>
+                  <Button
+                    variant="outline"
+                    className="w-full font-bold bg-teal-800 text-white"
                     onClick={() => {
                       router.push("/rally");
                       setMobileMenuOpen(false);
                     }}
                   >
                     Rally
-                  </Button> */}
+                  </Button>
                 </>
-              ) : (
+              )}
+              {role === "PENPOS" && (
+                <Button
+                  variant="outline"
+                  className="w-full font-bold bg-teal-800 text-white"
+                  onClick={() => {
+                    router.push("/pos");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Dashboard Penpos
+                </Button>
+              )}
+              {role === "ADMIN" && (
                 <Button
                   className="w-full font-bold bg-teal-800 text-white"
                   onClick={() => {
