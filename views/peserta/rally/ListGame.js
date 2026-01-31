@@ -108,7 +108,6 @@ export default function ListGame() {
 
     const userInfo = userInfoData?.data || null;
     const points = userInfo?.points || 0;
-    const koin = userInfo?.koin || 0;
 
     const posts = Array.isArray(data?.data) ? data.data : [];
     const filteredPosts = posts.filter((post) =>
@@ -150,11 +149,6 @@ export default function ListGame() {
                             <Trophy className="h-5 w-5 text-yellow-400" />
                             <span className="text-zinc-300 font-medium">Points:</span>
                             <span className="text-yellow-400 font-bold text-lg">{points}</span>
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm">
-                            <Coins className="h-5 w-5 text-emerald-400" />
-                            <span className="text-zinc-300 font-medium">Koin:</span>
-                            <span className="text-emerald-400 font-bold text-lg">{koin}</span>
                         </div>
                     </div>
                 )}
