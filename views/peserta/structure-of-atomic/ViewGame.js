@@ -52,11 +52,11 @@ const setCurrentPage = (page) => {
 
 const getImagePaths = (page) => {
   return [
-    `/Asset/image-soal-atom/page${page}-atom.png`,
-    `/Asset/image-soal-atom/page${page}-atom.jpeg`,
-    `/Asset/image-soal-atom/page${page}-atom.png`,
-    `/Asset/image-soal-atom/page${page}-atom.jpeg`,
-    `/Asset/image-soal-atom/page${page}-atom.jpeg`,
+    `/Asset/image-soal-atom/page${page}-atom.webp`,
+    `/Asset/image-soal-atom/page${page}-atom.webp`,
+    `/Asset/image-soal-atom/page${page}-atom.webp`,
+    `/Asset/image-soal-atom/page${page}-atom.webp`,
+    `/Asset/image-soal-atom/page${page}-atom.webp`,
   ];
 };
 

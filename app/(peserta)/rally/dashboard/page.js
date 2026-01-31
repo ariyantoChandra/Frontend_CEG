@@ -29,7 +29,7 @@ export default function DashboardPeserta() {
   return (
     <div className="min-h-screen relative w-full font-sans">
       <div className="fixed inset-0 -z-10">
-        <Image src="/Asset/Background Landscape.png" alt="Background" fill className="object-cover" priority />
+        <Image src="/Asset/Background Landscape.webp" alt="Background" fill className="object-cover" priority />
       </div>
       
       <Navbar />
@@ -45,7 +45,7 @@ export default function DashboardPeserta() {
             
             <CardHeader className="bg-teal-800/10 border-b border-teal-800/10 text-center py-10">
               <div className="mx-auto bg-white/50 p-3 rounded-full w-fit mb-4 shadow-sm">
-                 <Image src="/Asset/Maskot.jpg" alt="Profile" width={80} height={80} className="rounded-full object-cover aspect-square" />
+                 <Image src="/Asset/Maskot.webp" alt="Profile" width={80} height={80} className="rounded-full object-cover aspect-square" />
               </div>
               <CardTitle className="text-3xl md:text-4xl font-black text-teal-900 uppercase tracking-tight">
                 {data.nama_tim}

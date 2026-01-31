@@ -6,13 +6,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Instagram, Phone } from "lucide-react";
 import { SiLine } from "react-icons/si";
-    
+
 import { useAppSelector } from "@/core/store/hooks";
 
 const images = [
-    "/Asset/DSC00643.JPG",
-    "/Asset/FIO01873.JPG",
-    "/Asset/DSC00474.JPG",
+    "/Asset/DSC00643.webp",
+    "/Asset/FIO01873.webp",
+    "/Asset/DSC00474.webp",
 ];
 
 const faqData = [
@@ -22,19 +22,52 @@ const faqData = [
     { id: 4, question: "Bagaimana cara akses berkas?", answer: "Semua berkas bisa diunduh di bagian Resources di bawah ini." }
 ];
 
-export default function HomepagePeserta() {
-    const [active, setActive] = useState(1);
-    const [isMobile, setIsMobile] = useState(false);
-
-    const token = useAppSelector((state) => state.token.token);
+function useDebounce(value, delay) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
 
     useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+}
+
+
+export default function HomepagePeserta() {
+    const [active, setActive] = useState(1);
+    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 768);
+    const token = useAppSelector((state) => state.token.token);
+
+    const debouncedWidth = useDebounce(windowWidth, 150);
+    const isMobile = useMemo(() => debouncedWidth < 768, [debouncedWidth]);
+
+    useEffect(() => {
+        const criticalImages = [
+            "/Asset/Background Landscape.webp",
+            "/Asset/CEG HOMEPAGE.webp",
+            images[1],
+        ];
+
+        criticalImages.forEach((src) => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = src;
+            document.head.appendChild(link);
+        });
+
         const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
+            setWindowWidth(window.innerWidth);
         };
 
         checkMobile();
-        window.addEventListener('resize', checkMobile);
+        window.addEventListener('resize', checkMobile, { passive: true });
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
@@ -59,18 +92,38 @@ export default function HomepagePeserta() {
         return result;
     }, [active, isMobile]);
 
+    useEffect(() => {
+        const nextIdx = (active + 1) % images.length;
+        const prevIdx = (active - 1 + images.length) % images.length;
+
+        [images[nextIdx], images[prevIdx]].forEach((src) => {
+            const existing = document.querySelector(`link[href="${src}"]`);
+            if (!existing) {
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.as = 'image';
+                link.href = src;
+                document.head.appendChild(link);
+            }
+        });
+    }, [active]);
+
     return (
         <div className="relative w-full min-h-screen overflow-y-auto">
 
             {/* ===== BACKGROUND FIXED ===== */}
             <div className="fixed inset-0 -z-10">
                 <Image
-                    src="/Asset/Background Landscape.png"
+                    src="/Asset/Background Landscape.webp"
                     alt="Background Landscape"
                     fill
                     className="object-cover"
                     priority
                     draggable={false}
+                    quality={85}
+                    sizes="100vw"
+                    placeholder="blur"
+                    blurDataURL="data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA="
                 />
             </div>
 
@@ -80,12 +133,14 @@ export default function HomepagePeserta() {
                     <div className="flex flex-col items-center text-center max-w-5xl">
                         <div className="relative w-full max-w-2xl h-[200px] md:h-[180px] mb-8 animate-in fade-in zoom-in duration-700">
                             <Image
-                                src="/Asset/CEG HOMEPAGE.png"
+                                src="/Asset/CEG HOMEPAGE.webp"
                                 alt="Chemical Engineering Games 2026"
                                 fill
                                 className="object-contain drop-shadow-2xl"
                                 priority
                                 draggable={false}
+                                quality={90}
+                                sizes="(max-width: 768px) 100vw, 672px"
                             />
                         </div>
 
@@ -136,7 +191,9 @@ export default function HomepagePeserta() {
                                         loading={isActive ? "eager" : "lazy"}
                                         priority={isActive && idx === active}
                                         sizes="(max-width: 768px) 90vw, (max-width: 1024px) 500px, 380px"
-                                        quality={isActive ? 85 : 75}
+                                        quality={isActive ? 82 : 70}
+                                        placeholder="blur"
+                                        blurDataURL="data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA="
                                     />
                                 </div>
                             ))}
@@ -153,7 +210,7 @@ export default function HomepagePeserta() {
                         <div className="md:col-span-8 flex flex-col items-start">
                             <div className="w-full mb-6">
                                 <Image
-                                    src="/Asset/CEG 2026.png"
+                                    src="/Asset/CEG 2026.webp"
                                     alt="Title"
                                     width={800}
                                     height={200}
@@ -161,7 +218,7 @@ export default function HomepagePeserta() {
                                     draggable={false}
                                     loading="lazy"
                                     sizes="(max-width: 768px) 100vw, 800px"
-                                    quality={85}
+                                    quality={80}
                                 />
                             </div>
                             <div className="bg-white/40 backdrop-blur-sm rounded-[25px] p-6 md:p-8 shadow-lg w-full border border-white/20">
@@ -185,7 +242,7 @@ export default function HomepagePeserta() {
                         </div>
                         <div className="md:col-span-4 flex justify-center items-end">
                             <Image
-                                src="/Asset/No Background.png"
+                                src="/Asset/No Background.webp"
                                 alt="Mascot"
                                 width={500}
                                 height={500}
@@ -193,7 +250,7 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="(max-width: 768px) 100vw, 500px"
-                                quality={80}
+                                quality={75}
                             />
                         </div>
                     </div>
@@ -204,7 +261,7 @@ export default function HomepagePeserta() {
                     <div className="flex items-center flex-col gap-3 md:gap-10">
                         <div>
                             <Image
-                                src="/Asset/TIMELINE.png"
+                                src="/Asset/TIMELINE.webp"
                                 alt="Timeline"
                                 width={400}
                                 height={100}
@@ -212,12 +269,12 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="(max-width: 768px) 200px, 350px"
-                                quality={75}
+                                quality={70}
                             />
                         </div>
                         <div className="relative w-full mb-10 md:mb-20">
                             <Image
-                                src="/Asset/TIMELINE (1).png"
+                                src="/Asset/TIMELINE (1).webp"
                                 alt="Schedule"
                                 width={1200}
                                 height={600}
@@ -225,14 +282,14 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="100vw"
-                                quality={75}
+                                quality={70}
                             />
                         </div>
                     </div>
                     <div className="flex items-center flex-col gap-3 md:gap-10">
                         <div>
                             <Image
-                                src="/Asset/BABAK PERLOMBAAN (1).png"
+                                src="/Asset/BABAK PERLOMBAAN (1).webp"
                                 alt="Babak"
                                 width={550}
                                 height={150}
@@ -240,12 +297,12 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="(max-width: 768px) 280px, 550px"
-                                quality={75}
+                                quality={70}
                             />
                         </div>
                         <div className="relative w-full">
                             <Image
-                                src="/Asset/BABAK PERLOMBAAN.png"
+                                src="/Asset/BABAK PERLOMBAAN.webp"
                                 alt="Detail"
                                 width={1200}
                                 height={600}
@@ -253,27 +310,27 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="100vw"
-                                quality={75}
+                                quality={70}
                             />
                         </div>
                     </div>
                     <div className="flex items-center flex-col gap-0 mt:gap-10">
                         <div>
                             <Image
-                                src="/Asset/HADIAH TEXT.png"
+                                src="/Asset/HADIAH TEXT.webp"
                                 alt="Babak"
                                 width={550}
                                 height={150}
-                                className="drop-shadow-2xl w-[280px] md:w-[550px] h-auto object-contain"
+                                className="drop-shadow-2xl w-[280px] md:w-[400px] h-auto object-contain"
                                 draggable={false}
                                 loading="lazy"
                                 sizes="(max-width: 768px) 280px, 550px"
-                                quality={75}
+                                quality={70}
                             />
                         </div>
                         <div className="relative w-full">
                             <Image
-                                src="/Asset/HADIAH.png"
+                                src="/Asset/HADIAH.webp"
                                 alt="Detail"
                                 width={1200}
                                 height={600}
@@ -281,7 +338,7 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="100vw"
-                                quality={75}
+                                quality={70}
                             />
                         </div>
                     </div>
@@ -291,7 +348,7 @@ export default function HomepagePeserta() {
                 <section id="pre-event" className="w-full flex flex-col items-center pt-20 md:pt-24">
                     <div>
                         <Image
-                            src="/Asset/PRE-EVENT (1) (1).png"
+                            src="/Asset/PRE-EVENT (1) (1).webp"
                             alt="Pre-Event"
                             width={400}
                             height={100}
@@ -299,7 +356,7 @@ export default function HomepagePeserta() {
                             draggable={false}
                             loading="lazy"
                             sizes="(max-width: 768px) 220px, 400px"
-                            quality={75}
+                            quality={70}
                         />
                     </div>
 
@@ -327,7 +384,7 @@ export default function HomepagePeserta() {
 
                     <div className="relative w-full max-w-4xl px-4">
                         <Image
-                            src="/Asset/PRE-EVENT.png"
+                            src="/Asset/PRE-EVENT.webp"
                             alt="Poster"
                             width={1200}
                             height={600}
@@ -335,7 +392,7 @@ export default function HomepagePeserta() {
                             draggable={false}
                             loading="lazy"
                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 1200px"
-                            quality={75}
+                            quality={70}
                         />
                     </div>
                 </section>
@@ -344,7 +401,7 @@ export default function HomepagePeserta() {
                 <section id="resources" className="w-full flex flex-col items-center">
                     <div>
                         <Image
-                            src="/Asset/RESOURCES.png"
+                            src="/Asset/RESOURCES.webp"
                             alt="Resources"
                             width={400}
                             height={100}
@@ -352,13 +409,13 @@ export default function HomepagePeserta() {
                             draggable={false}
                             loading="lazy"
                             sizes="(max-width: 768px) 260px, 450px"
-                            quality={75}
+                            quality={70}
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
                         <div className="bg-white/40 backdrop-blur-sm border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
                             <Image
-                                src="/Asset/RESOURCES BOOKLET.png"
+                                src="/Asset/RESOURCES BOOKLET.webp"
                                 alt="Icon"
                                 width={150}
                                 height={150}
@@ -366,7 +423,7 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="150px"
-                                quality={80}
+                                quality={75}
                             />
                             <h3 className="text-2xl font-black text-teal-800 mb-2">Booklet Peserta</h3>
                             <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">Informasi mendalam mengenai pendaftaran dan aturan.</p>
@@ -376,7 +433,7 @@ export default function HomepagePeserta() {
                         </div>
                         <div className="bg-white/40 backdrop-blur-sm border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
                             <Image
-                                src="/Asset/RESOURCES SOP.png"
+                                src="/Asset/RESOURCES SOP.webp"
                                 alt="Icon"
                                 width={150}
                                 height={150}
@@ -384,7 +441,7 @@ export default function HomepagePeserta() {
                                 draggable={false}
                                 loading="lazy"
                                 sizes="150px"
-                                quality={80}
+                                quality={75}
                             />
                             <h3 className="text-2xl font-black text-teal-800 mb-2">SOP Lomba</h3>
                             <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">Panduan operasional selama hari-H kompetisi.</p>
@@ -399,7 +456,7 @@ export default function HomepagePeserta() {
                 <section id="faq" className="w-full flex flex-col gap-10 items-center pt-24">
                     <div>
                         <Image
-                            src="/Asset/FAQ.png"
+                            src="/Asset/FAQ.webp"
                             alt="FAQ"
                             width={400}
                             height={100}
@@ -407,7 +464,7 @@ export default function HomepagePeserta() {
                             draggable={false}
                             loading="lazy"
                             sizes="(max-width: 768px) 100vw, 700px"
-                            quality={75}
+                            quality={70}
                         />
                     </div>
                     <div className="grid gap-4 w-full">
@@ -472,25 +529,25 @@ export default function HomepagePeserta() {
                         </h3>
                         <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-7 gap-3 pb-10 md:gap-4 items-center justify-items-center">
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/logoEJT.png" alt="Event Jawa Timur" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/logoEJT.webp" alt="Event Jawa Timur" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/logolombasma.png" alt="Lomba SMA" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/logolombasma.webp" alt="Lomba SMA" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/eventpelajar.jpg" alt="Event Pelajar" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/eventpelajar.webp" alt="Event Pelajar" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/infolomba.png" alt="Info Lomba" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/infolomba.webp" alt="Info Lomba" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/pointkampus.png" alt="Point Kampus" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/pointkampus.webp" alt="Point Kampus" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/katalogevent.png" alt="Katalog Event Indonesia" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/katalogevent.webp" alt="Katalog Event Indonesia" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                             <div className="relative w-full aspect-square max-w-24 md:max-w-32 bg-white/40 backdrop-blur-sm rounded-lg p-3 border border-white/40 flex items-center justify-center hover:bg-white/60 transition-colors">
-                                <Image src="/Asset/medpar/partnerevent.png" alt="Partner Event" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={70} />
+                                <Image src="/Asset/medpar/partnerevent.webp" alt="Partner Event" fill className="object-contain p-2" draggable={false} loading="lazy" sizes="(max-width: 768px) 96px, 128px" quality={65} />
                             </div>
                         </div>
                     </div>

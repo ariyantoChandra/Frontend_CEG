@@ -20,8 +20,8 @@ const loginSchema = Yup.object({
   password: Yup.string().required("Password harus diisi"),
 });
 
-const backgroundPath = "/Asset/Background Landscape.png";
-const welcomePath = "/Asset/LOGIN.png";
+const backgroundPath = "/Asset/Background Landscape.webp";
+const welcomePath = "/Asset/LOGIN.webp";
 
 export default function LoginPage() {
   const router = useRouter();

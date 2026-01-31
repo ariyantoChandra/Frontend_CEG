@@ -135,7 +135,7 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
 
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/Asset/CEG HOMEPAGE.png" alt="CEG" width={100} height={100} />
+            <Image src="/Asset/CEG HOMEPAGE.webp" alt="CEG" width={100} height={100} />
           </Link>
 
           {!isAuthPage && (

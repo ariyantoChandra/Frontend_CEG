@@ -71,17 +71,14 @@ export default function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  // Hanya huruf, angka, dan spasi
   const filterAllSpecialChars = (value) => {
     return value.replace(/[^a-zA-Z0-9 ]/g, "");
   };
 
-  // Khusus email
   const filterEmailChars = (value) => {
     return value.replace(/[^a-zA-Z0-9@._-]/g, "");
   };
 
-  // Khusus username Instagram (mengizinkan @, _, ., -)
   const filterInstagramUsername = (value) => {
     return value.replace(/[^a-zA-Z0-9@._-]/g, "");
   };
@@ -116,7 +113,7 @@ export default function Register() {
       return;
     }
     const updated = [...allTeamsData];
-    updated[currentTeamIndex].groupData[name] = filteredValue; // ✅ FIX
+    updated[currentTeamIndex].groupData[name] = filteredValue;
     setAllTeamsData(updated);
   };
 
@@ -124,7 +121,6 @@ export default function Register() {
     const file = e.target.files[0];
     if (file) {
       const updated = [...allTeamsData];
-      // FIX: Jika bundle, simpan file di index 0 (Tim Pertama)
       const targetIndex = regType === "bundle" ? 0 : currentTeamIndex;
       updated[targetIndex].groupData.buktiPembayaranFile = file;
       setAllTeamsData(updated);
@@ -134,7 +130,6 @@ export default function Register() {
   const handleMemberChange = (memberIdx, field, val) => {
     let filteredValue;
     if (field === "username") {
-      // Username Instagram boleh mengandung @, _, ., -
       filteredValue = filterInstagramUsername(val);
       const updated = [...allTeamsData];
       updated[currentTeamIndex].members[memberIdx].usn_ig = filteredValue;
@@ -156,14 +151,12 @@ export default function Register() {
     }
   };
 
-  // --- FUNGSI UTAMA YANG DIPERBAIKI ---
   const handleProcessNext = async (e) => {
     e.preventDefault();
 
     const textInputs = e.target.querySelectorAll('input[type="text"]');
     for (let input of textInputs) {
       const placeholder = input.placeholder?.toLowerCase() || "";
-      // Username Instagram boleh mengandung @, _, ., -
       const isInstagramUsername = placeholder.includes("instagram");
       const allowedPattern = isInstagramUsername 
         ? /[^a-zA-Z0-9@._-]/ 
@@ -182,7 +175,6 @@ export default function Register() {
         return;
       }
     }
-    // 1. VALIDASI FILE SIZE & TYPE
     const fileInputs = e.target.querySelectorAll('input[type="file"]');
     for (let input of fileInputs) {
       if (input.files.length > 0) {
@@ -201,7 +193,6 @@ export default function Register() {
       }
     }
 
-    // 2. LOGIKA PINDAH STEP
     if (step === 0) {
       const count = regType === "bundle" ? 3 : 1;
       setAllTeamsData(
@@ -271,14 +262,11 @@ export default function Register() {
 
         formData.append("teams_data", JSON.stringify(teamsPayload));
 
-        // B. FILE BUKTI PEMBAYARAN (Satu File untuk Semua)
         const paymentFile = allTeamsData[0].groupData.buktiPembayaranFile;
         if (paymentFile) {
           formData.append("bukti_pembayaran", paymentFile);
         }
 
-        // C. FILE-FILE MEMBER (Looping Semua Tim & Member)
-        // Format Key: t{indexTim}_m{indexMember}_{jenisFile}
         allTeamsData.forEach((team, teamIdx) => {
           team.members.forEach((member, memberIdx) => {
             if (member.pasFotoFile)
@@ -307,7 +295,6 @@ export default function Register() {
           });
         });
 
-        // D. KIRIM SEKALI SAJA 🚀
         const res = await auth.register(formData);
 
         if (res.data && !res.data.success) {
@@ -344,7 +331,7 @@ export default function Register() {
     <div className="relative min-h-screen w-full font-sans">
       <div className="fixed inset-0 -z-10">
         <Image
-          src="/Asset/Background Landscape.png"
+          src="/Asset/Background Landscape.webp"
           alt="Background"
           fill
           className="object-cover"
@@ -357,7 +344,7 @@ export default function Register() {
         <div className="mb-4 text-center">
           <div className="mb-2">
             <Image
-              src="/Asset/LOGIN.png"
+              src="/Asset/LOGIN.webp"
               alt="Welcome"
               width={400}
               height={150}
