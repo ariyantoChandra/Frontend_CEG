@@ -145,11 +145,9 @@ export const useGameState = (equipmentList = []) => {
     }
   };
 
-  const handleAnswerCorrect = () => {
+  const reduceSequence = () => {
     if (selectedEquipment) {
       setCompletedEquipments((prev) => [...prev, selectedEquipment.id]);
-      
-      resetQuestionState();
       
       const sequence = getEquipmentSequence();
       if (sequence) {
@@ -158,15 +156,24 @@ export const useGameState = (equipmentList = []) => {
         
         if (newSequence.length > 0) {
           setNextTargetId(newSequence[0]);
-          
-          setTimeout(() => {
-            const nextEquipment = equipmentList.find((eq) => eq.id === newSequence[0]);
-            if (nextEquipment) {
-              setWelcomeEquipmentName(nextEquipment.name);
-              setShowWelcomeDialog(true);
-            }
-          }, 300);
         }
+      }
+    }
+  };
+
+  const handleAnswerCorrect = () => {
+    if (selectedEquipment) {
+      resetQuestionState();
+      
+      const sequence = getEquipmentSequence();
+      if (sequence && sequence.length > 0) {
+        setTimeout(() => {
+          const nextEquipment = equipmentList.find((eq) => eq.id === sequence[0]);
+          if (nextEquipment) {
+            setWelcomeEquipmentName(nextEquipment.name);
+            setShowWelcomeDialog(true);
+          }
+        }, 300);
       }
     }
   };
@@ -199,6 +206,7 @@ export const useGameState = (equipmentList = []) => {
     handleAnswerSelect,
     handleSubmitAnswer,
     handleAnswerCorrect,
+    reduceSequence,
     clearErrorMessage,
     resetQuestionState,
   };

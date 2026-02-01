@@ -1,20 +1,40 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import * as API from "@/core/services/api";
 
-export function useCheckAcc() {
+const getGameSessionId = () => {
+  try {
+    const gameData = localStorage.getItem("game_data");
+    if (!gameData) return null;
+    try {
+      const parsed = JSON.parse(gameData);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed.game_session_id || null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  } catch (err) {
+    console.error("Error reading game_data:", err);
+    return null;
+  }
+};
+
+export function useCheckGameSession() {
   const router = useRouter();
+  const gameSessionId = useMemo(() => getGameSessionId(), []);
 
   const { data, error, mutate } = useSWR(
-    "check-acc",
+    gameSessionId ? ["check-game-session", gameSessionId] : null,
     async () => {
+      if (!gameSessionId) return null;
       try {
-        const response = await API.rally.checkAcc();
+        const response = await API.rally.checkGameSession({ gamesession: gameSessionId });
         return response?.data;
       } catch (err) {
-        clearGameLocalStorage();
-        throw err;
+        return { success: false, data: false };
       }
     },
     {
@@ -25,11 +45,11 @@ export function useCheckAcc() {
   );
 
   useEffect(() => {
-    if (error) {
+    if (data?.data === false) {
       clearGameLocalStorage();
       router.push("/rally");
     }
-  }, [error, router]);
+  }, [data, router]);
 
   return { data, error, mutate };
 }

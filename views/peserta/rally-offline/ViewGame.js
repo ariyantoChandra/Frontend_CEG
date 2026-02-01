@@ -4,13 +4,13 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCheckAcc } from "@/core/hooks/useCheckAcc";
+import { useCheckGameSession } from "@/core/hooks/useCheckAcc";
 
 export default function ViewGame() {
   const router = useRouter();
 
-  // Check account status setiap render/mutate
-  useCheckAcc();
+  // Check game session setiap render/mutate
+  useCheckGameSession();
 
   const handleExit = () => {
     localStorage.removeItem("game_data");

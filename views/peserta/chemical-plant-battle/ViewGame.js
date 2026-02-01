@@ -27,15 +27,15 @@ import * as API from "@/core/services/api";
 import { getGameSessionId } from "./utils/getGameSessionId";
 import { mapEquipmentData } from "./utils/mapEquipmentData";
 import { hasGameStarted, markGameAsStarted } from "./utils/storage";
-import { useCheckAcc } from "@/core/hooks/useCheckAcc";
+import { useCheckGameSession } from "@/core/hooks/useCheckAcc";
 
 export default function ViewGame() {
   const router = useRouter();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const gameSessionId = getGameSessionId();
 
-  // Check account status setiap render/mutate
-  useCheckAcc();
+  // Check game session setiap render/mutate
+  useCheckGameSession();
 
   useEffect(() => {
     if (hasGameStarted()) {

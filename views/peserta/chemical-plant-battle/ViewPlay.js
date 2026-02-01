@@ -9,7 +9,7 @@ import { useGameState } from "./hooks/useGameState";
 import { clearGameStarted, clearAllGameData, getEquipmentSequence } from "./utils/storage";
 import { getGameSessionId } from "./utils/getGameSessionId";
 import { mapEquipmentData } from "./utils/mapEquipmentData";
-import { useCheckAcc } from "@/core/hooks/useCheckAcc";
+import { useCheckGameSession } from "@/core/hooks/useCheckAcc";
 import GameHeader from "./_components/GameHeader";
 import EquipmentCard from "./_components/EquipmentCard";
 import WelcomeDialog from "./_components/WelcomeDialog";
@@ -23,8 +23,8 @@ export default function ViewPlay() {
   const gameSessionId = getGameSessionId();
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
 
-  // Check account status setiap render/mutate
-  const { mutate: mutateCheckAcc } = useCheckAcc();
+  // Check game session setiap render/mutate
+  const { mutate: mutateCheckGameSession } = useCheckGameSession();
 
   const { data: apiResponse, error, isLoading } = useSWR(
     gameSessionId ? ["chemical-plant-battle-tools-play", gameSessionId] : null,
@@ -70,6 +70,7 @@ export default function ViewPlay() {
     handleAnswerSelect,
     handleSubmitAnswer,
     handleAnswerCorrect,
+    reduceSequence,
     clearErrorMessage,
   } = useGameState(equipmentList);
 
@@ -105,8 +106,8 @@ export default function ViewPlay() {
   const handleSubmit = () => {
     const isValid = handleSubmitAnswer(() => {
       startCountdown();
-      // Mutate checkAcc setelah submit berhasil
-      mutateCheckAcc();
+      // Mutate checkGameSession setelah submit berhasil
+      mutateCheckGameSession();
     });
 
     if (!isValid) {
@@ -183,6 +184,7 @@ export default function ViewPlay() {
         onAnswerSelect={handleAnswerSelect}
         onSubmit={handleSubmit}
         onNext={handleAnswerCorrect}
+        onReduceSequence={reduceSequence}
       />
 
       <GameCompletionDialog

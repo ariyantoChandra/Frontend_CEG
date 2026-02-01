@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,10 +23,25 @@ export default function QuestionDialog({
   onAnswerSelect,
   onSubmit,
   onNext,
+  onReduceSequence,
 }) {
   if (!equipment) return null;
 
   const isCorrect = showResult && selectedAnswer !== null;
+  const hasReducedSequence = useRef(false);
+
+  useEffect(() => {
+    if (isCorrect && !hasReducedSequence.current && isOpen && onReduceSequence) {
+      hasReducedSequence.current = true;
+      onReduceSequence();
+    }
+  }, [isCorrect, onReduceSequence, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      hasReducedSequence.current = false;
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

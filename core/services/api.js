@@ -50,6 +50,8 @@ export const pos = {
 export const rally = {
   checkAcc: () => handleRequest(axiosInstance.get("/api/user/check-acc")),
 
+  checkGameSession: (params) => handleRequest(axiosInstance.get("/api/user/check-game-session", { params })),
+
   getUpdatedCurrentPost: (data) =>
     handleRequest(axiosInstance.put("/api/user/update-user-pos", data)),
 
