@@ -28,6 +28,11 @@ export const penpos = {
       axiosInstance.get("/api/penpos/get-list-team", { params: currentPost })
     ),
 
+  getListTeamPlaying: (gamesession) =>
+    handleRequest(
+      axiosInstance.get("/api/penpos/get-team-playing", { params: gamesession })
+    ),
+
   startBattle: (data) =>
     handleRequest(axiosInstance.post("/api/penpos/create-game-session", data)),
 

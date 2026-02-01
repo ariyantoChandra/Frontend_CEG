@@ -7,7 +7,6 @@ import { penpos } from "@/core/services/api";
 import useSWR from "swr";
 import { toast } from "sonner";
 import {
-    extractTeamsData,
     DEFAULT_POS_TYPE,
     DEFAULT_POS_NAME,
     REDIRECT_DELAY,
@@ -25,9 +24,14 @@ export default function PostResultPage() {
     const userPenpos = useAppSelector((state) => state.user.userPenpos);
     const navigationBlockedRef = useRef(false);
 
+    const gameSessionId = localStorage.getItem("game_sessions_id");
+    if (!gameSessionId) {
+        throw new Error("Game session ID tidak ditemukan. Silakan mulai game terlebih dahulu.");
+    }
+
     const { data: currentTeamsData, error: fetchError, isLoading } = useSWR(
-        userPenpos ? ["getCurrentTeams", userPenpos] : null,
-        () => penpos.setUpdatedTeam({ currentPos: userPenpos })
+        gameSessionId ? ["getCurrentTeams", gameSessionId] : null,
+        () => penpos.getListTeamPlaying({ gamesession: gameSessionId })
     );
 
     const [gameResults, setGameResults] = useState({
@@ -51,11 +55,25 @@ export default function PostResultPage() {
 
         if (currentTeamsData?.data?.data) {
             const teamsArray = currentTeamsData.data.data;
-            const { posType, posName, team1, team2 } = extractTeamsData(teamsArray);
-
+            
+            const posType = teamsArray.length === 1 ? "SINGLE" : "BATTLE";
             const finalPosType = storedPosType || posType || DEFAULT_POS_TYPE;
 
-            setPosInfo({ type: finalPosType, name: posName });
+            const team1 = {
+                teamId: teamsArray[0]?.id || null,
+                teamName: teamsArray[0]?.nama_tim || "",
+                status: "",
+            };
+
+            const team2 = finalPosType === "BATTLE" && teamsArray[1]
+                ? {
+                    teamId: teamsArray[1]?.id || null,
+                    teamName: teamsArray[1]?.nama_tim || "",
+                    status: "",
+                }
+                : null;
+
+            setPosInfo({ type: finalPosType, name: DEFAULT_POS_NAME });
             setGameResults({ team1, team2 });
         } else {
             if (storedPosType) {
@@ -70,11 +88,11 @@ export default function PostResultPage() {
         if (posType === "SINGLE") {
             return gameResults.team1.status !== "";
         }
-        
+
         if (gameResults.team1.status === "" || gameResults.team2?.status === "") {
             return false;
         }
-        
+
         const winCount = [gameResults.team1.status, gameResults.team2?.status].filter(s => s === "WIN").length;
         return winCount <= 1;
     }, [gameResults, posInfo.type]);
@@ -119,9 +137,9 @@ export default function PostResultPage() {
                 ...prev,
                 team1: { ...prev.team1, status },
             };
-            
+
             checkValidation(newResults);
-            
+
             return newResults;
         });
     };
@@ -132,16 +150,16 @@ export default function PostResultPage() {
                 ...prev,
                 team2: { ...prev.team2, status },
             };
-            
+
             checkValidation(newResults);
-            
+
             return newResults;
         });
     };
 
     const checkValidation = (results) => {
         const posType = localStorage.getItem("pos_type") || posInfo.type || DEFAULT_POS_TYPE;
-        
+
         if (posType === "BATTLE" && results.team1.status && results.team2?.status) {
             if (results.team1.status === "WIN" && results.team2.status === "WIN") {
                 setValidationWarning("Hanya satu tim yang boleh menang. Tidak boleh kedua tim menang bersamaan.");
