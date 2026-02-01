@@ -25,9 +25,6 @@ export default function PostResultPage() {
     const navigationBlockedRef = useRef(false);
 
     const gameSessionId = localStorage.getItem("game_sessions_id");
-    if (!gameSessionId) {
-        throw new Error("Game session ID tidak ditemukan. Silakan mulai game terlebih dahulu.");
-    }
 
     const { data: currentTeamsData, error: fetchError, isLoading } = useSWR(
         gameSessionId ? ["getCurrentTeams", gameSessionId] : null,

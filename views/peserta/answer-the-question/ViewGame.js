@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import useSWR from "swr";
 import * as API from "@/core/services/api";
+import { useCheckAcc } from "@/core/hooks/useCheckAcc";
 
 const getGameSessionId = () => {
   try {
@@ -52,6 +53,9 @@ export default function ViewGame() {
   const [gameSessionId, setGameSessionId] = useState(null);
   const [currentPage, setCurrentPageState] = useState(1);
   const [answered, setAnswered] = useState(false);
+
+  // Check account status setiap render/mutate
+  const { mutate: mutateCheckAcc } = useCheckAcc();
 
   useEffect(() => {
     const sessionId = getGameSessionId();
@@ -166,6 +170,9 @@ export default function ViewGame() {
 
       if (response?.data?.success) {
         toast.success("Jawaban berhasil dikirim!");
+
+        // Mutate checkAcc setelah submit berhasil
+        mutateCheckAcc();
 
         const nextPage = currentPage + 1;
 

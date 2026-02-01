@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import * as API from "@/core/services/api";
+import { useCheckAcc } from "@/core/hooks/useCheckAcc";
 
 // ==================== CONSTANTS ====================
 const GAME_PHASES = {
@@ -407,6 +408,9 @@ export default function ViewGame() {
     const postId = params?.id;
     const gameSessionId = useMemo(() => getGameSessionId(), []);
 
+    // Check account status setiap render/mutate
+    const { mutate: mutateCheckAcc } = useCheckAcc();
+
     // Game state
     const [playerHand, setPlayerHand] = useState([]);
     const [selectedCard, setSelectedCard] = useState(null);
@@ -623,6 +627,9 @@ export default function ViewGame() {
                                     setBattleResult(BATTLE_RESULTS.DRAW);
                                 }
                             }
+
+                            // Mutate checkAcc setelah battle selesai
+                            mutateCheckAcc();
 
                             toast.success("Kedua kartu sudah dipilih! Battle dimulai.");
                         } else {

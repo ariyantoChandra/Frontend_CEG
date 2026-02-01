@@ -10,6 +10,7 @@ import { getGameSessionId } from "./utils/getGameSessionId";
 import { useGameData } from "./hooks/useGameData";
 import { useGameState } from "./hooks/useGameState";
 import { clearGameStorage } from "./utils/storage";
+import { useCheckAcc } from "@/core/hooks/useCheckAcc";
 import ProcessLayout from "./_components/ProcessLayout";
 import LoadingState from "./_components/LoadingState";
 import ErrorState from "./_components/ErrorState";
@@ -17,6 +18,9 @@ import ErrorState from "./_components/ErrorState";
 export default function ViewGame() {
   const router = useRouter();
   const gameSessionId = getGameSessionId();
+
+  // Check account status setiap render/mutate
+  const { mutate: mutateCheckAcc } = useCheckAcc();
 
   const { data, error, isLoading } = useGameData(gameSessionId);
   const {
@@ -26,9 +30,15 @@ export default function ViewGame() {
     processesConfig,
     allSlotsFilled,
     handleItemClick,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
     getItemById,
   } = useGameState(data, gameSessionId);
+
+  const handleSubmit = async () => {
+    await originalHandleSubmit();
+    // Mutate checkAcc setelah submit
+    mutateCheckAcc();
+  };
 
   const handleBack = () => {
     clearGameStorage();
