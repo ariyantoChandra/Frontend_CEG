@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -26,13 +26,21 @@ import SubmitButton from "@/components/shared/penpos/SubmitButton";
 
 export default function HomePagePenpos() {
     const router = useRouter();
+    const pathname = usePathname();
     const dispatch = useAppDispatch();
     const userPenpos = useAppSelector((state) => state.user.userPenpos);
+    const prevPathnameRef = useRef(pathname);
 
     const { data: responseGetPos } = useSWR(["getPos"], () => penpos.getPos());
-    const { data: teamsResponse, error: teamsError, isLoading: isLoadingTeams } = useSWR(
+    const { data: teamsResponse, error: teamsError, isLoading: isLoadingTeams, mutate: mutateTeams } = useSWR(
         userPenpos ? ["getTeams", userPenpos] : null,
-        () => penpos.setUpdatedTeam({ currentPos: userPenpos })
+        () => penpos.setUpdatedTeam({ currentPos: userPenpos }),
+        {
+            revalidateOnMount: true,
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+            dedupingInterval: 0,
+        }
     );
 
     const [posInfo, setPosInfo] = useState({ name: "", type: BATTLE_MODE, id: null });
@@ -117,10 +125,27 @@ export default function HomePagePenpos() {
 
     useEffect(() => {
         const extractedTeams = extractTeamsData(teamsResponse);
-        if (extractedTeams.length > 0) {
-            setTeams(extractedTeams);
-        }
+        setTeams(extractedTeams || []);
     }, [teamsResponse]);
+
+    useEffect(() => {   
+        setSelectedTeams([]);
+        
+        if (prevPathnameRef.current !== pathname && pathname === "/pos" && userPenpos) {
+            setTeams([]);
+            mutateTeams();
+        }
+        
+        prevPathnameRef.current = pathname;
+    }, [pathname, userPenpos, mutateTeams]);
+
+    useEffect(() => {
+        if (userPenpos) {
+            setSelectedTeams([]);
+            mutateTeams();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const isValidSelection = () => {
         if (posInfo.type === SINGLE_MODE) {

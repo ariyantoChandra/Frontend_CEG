@@ -148,7 +148,6 @@ export default function ViewGame() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gameSessionId, setGameSessionId] = useState(null);
   const [showResult, setShowResult] = useState(false);
-  const [finalScore, setFinalScore] = useState(0);
 
   // Check game session setiap render/mutate
   const { mutate: mutateCheckGameSession } = useCheckGameSession();
@@ -207,7 +206,7 @@ export default function ViewGame() {
 
     const totalBoxes = question.kotak || 0;
     const filledBoxes = Object.keys(answers).length;
-    
+
     if (filledBoxes < totalBoxes) {
       toast.error("Lengkapi semua kotak terlebih dahulu!");
       return;
@@ -228,26 +227,24 @@ export default function ViewGame() {
 
       if (response?.data?.success) {
         toast.success("Jawaban berhasil dikirim!");
-        
+
         // Mutate checkGameSession setelah submit berhasil
         mutateCheckGameSession();
-        
+
         if (currentPage === 5) {
-          const score = response?.data?.data?.score || response?.data?.score || 0;
-          setFinalScore(score);
           setShowResult(true);
-          
+
           localStorage.removeItem("structure_of_atomic_page");
           localStorage.removeItem("game_data");
         } else {
           const nextPage = currentPage + 1;
-          setCurrentPage(nextPage); 
+          setCurrentPage(nextPage);
           setCurrentPageState(nextPage);
-          
+
           setAnswers({});
           setQuestion(null);
           setIsLoading(true);
-          
+
           try {
             const nextPageResponse = await API.structureOfAtomic.getItemsQuestion({
               game_session_id: gameSessionId,
@@ -328,23 +325,13 @@ export default function ViewGame() {
                 Kamu sudah menyelesaikan permainan
               </p>
 
-              {/* Score Display */}
-              <div className="mb-8">
-                <div className="inline-block bg-zinc-800/50 border border-zinc-700 rounded-xl px-8 py-6">
-                  <p className="text-sm text-zinc-400 mb-2">Skor Akhir</p>
-                  <p className="text-4xl sm:text-5xl font-bold text-cyan-400">
-                    {finalScore}
-                  </p>
-                </div>
-              </div>
-
               {/* Exit Button */}
               <Button
                 onClick={() => {
                   localStorage.removeItem("structure_of_atomic_page");
                   localStorage.removeItem("game_data");
                   localStorage.removeItem("gameStatus");
-                  
+
                   router.push("/rally");
                 }}
                 className="bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-6 text-lg font-semibold"
