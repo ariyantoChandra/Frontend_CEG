@@ -163,11 +163,11 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {!isMounted ? null : token ? (
               <>
-                {role === "PESERTA" && (
+                {/* {role === "PESERTA" && (
                   <Button variant="outline" className="font-bold text-teal-900 hover:bg-white/40" onClick={() => router.push('/rally')}>
                     Rally
                   </Button>
-                )}
+                )} */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-teal-800/30 text-teal-900 bg-white/40 rounded-full font-bold px-5">
@@ -246,7 +246,7 @@ export default function Navbar() {
                     {statusPayment === "unverified" ? "Menunggu Terverifikasi" : statusPayment === "verified" ? "Terverifikasi" : "Menunggu Verifikasi"}
                   </Badge>
                   <div className="border-t"></div>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     className="w-full font-bold bg-teal-800 text-white"
                     onClick={() => {
@@ -255,7 +255,7 @@ export default function Navbar() {
                     }}
                   >
                     Rally
-                  </Button>
+                  </Button> */}
                 </>
               )}
               {role === "PENPOS" && (
