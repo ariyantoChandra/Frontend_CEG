@@ -174,17 +174,6 @@ export default function HomepagePeserta() {
                 kritis, kreatif, dan strategis.
               </p>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              {!token && (
-                <Button
-                  asChild
-                  className="bg-teal-800 hover:bg-teal-900 text-white px-12 py-7 rounded-full text-xl font-bold shadow-lg transition-transform hover:scale-105"
-                >
-                  <Link href="/register">Daftar Sekarang</Link>
-                </Button>
-              )}
-            </div>
           </div>
         </section>
 
@@ -493,7 +482,7 @@ export default function HomepagePeserta() {
                 asChild
                 className="w-full bg-[#58a644] hover:bg-[#4a8c39] py-7 rounded-2xl font-bold text-lg"
               >
-                <Link href="/Asset/GUIDELINE BOOK CEG 2026 (1).pdf">
+                <Link href="/Asset/GUIDELINE.pdf">
                   Download Booklet
                 </Link>
               </Button>
@@ -520,7 +509,7 @@ export default function HomepagePeserta() {
                 asChild
                 className="w-full bg-[#1b8a86] hover:bg-[#156e6b] py-7 rounded-2xl font-bold text-lg"
               >
-                <Link href="/Asset/Standart Operational Procedure Chemical Engineering Games 2026.pdf">
+                <Link href="/Asset/SOP.pdf">
                   Download SOP
                 </Link>
               </Button>
