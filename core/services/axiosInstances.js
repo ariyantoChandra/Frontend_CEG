@@ -2,8 +2,8 @@ import axios from "axios";
 import { setupInterceptorsTo } from "./interceptors";
 
 export const createAxiosInstance = (options = {}, axiosConfig = {}) => {
-  const baseUrl = "https://apitesting.cegubaya.com";
-  // const baseUrl = "https://api.cegubaya.com";
+  //const baseUrl = "https://apitesting.cegubaya.com";
+  const baseUrl = "https://api.cegubaya.com";
 
   const instance = axios.create({
     baseURL: `${baseUrl}`,

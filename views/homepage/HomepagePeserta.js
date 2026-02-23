@@ -482,9 +482,7 @@ export default function HomepagePeserta() {
                 asChild
                 className="w-full bg-[#58a644] hover:bg-[#4a8c39] py-7 rounded-2xl font-bold text-lg"
               >
-                <Link href="/Asset/GUIDELINE.pdf">
-                  Download Booklet
-                </Link>
+                <Link href="/Asset/GUIDELINE.pdf">Download Booklet</Link>
               </Button>
             </div>
             <div className="bg-white/40 backdrop-blur-sm border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
@@ -509,16 +507,62 @@ export default function HomepagePeserta() {
                 asChild
                 className="w-full bg-[#1b8a86] hover:bg-[#156e6b] py-7 rounded-2xl font-bold text-lg"
               >
-                <Link href="/Asset/SOP.pdf">
-                  Download SOP
-                </Link>
+                <Link href="/Asset/SOP.pdf">Download SOP</Link>
+              </Button>
+            </div>
+            <div className="bg-white/40 backdrop-blur-sm border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
+              <Image
+                src="/Asset/RESOURCES SOP.webp"
+                alt="Icon"
+                width={150}
+                height={150}
+                className="mb-6 group-hover:scale-105 transition-transform duration-200 will-change-transform"
+                draggable={false}
+                loading="lazy"
+                sizes="150px"
+                quality={75}
+              />
+              <h3 className="text-2xl font-black text-teal-800 mb-2">
+                List Hotel
+              </h3>
+              <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">
+                List-list hotel yang tersedia di surabaya
+              </p>
+              <Button
+                asChild
+                className="w-full bg-[#1b8a86] hover:bg-[#156e6b] py-7 rounded-2xl font-bold text-lg"
+              >
+                <Link href="/Asset/ListHotel.pdf">Buka List Hotel</Link>
+              </Button>
+            </div>
+            <div className="bg-white/40 backdrop-blur-sm border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
+              <Image
+                src="/Asset/RESOURCES SOP.webp"
+                alt="Icon"
+                width={150}
+                height={150}
+                className="mb-6 group-hover:scale-105 transition-transform duration-200 will-change-transform"
+                draggable={false}
+                loading="lazy"
+                sizes="150px"
+                quality={75}
+              />
+              <h3 className="text-2xl font-black text-teal-800 mb-2">FAQ</h3>
+              <p className="text-teal-900/60 text-sm mb-8 text-center leading-relaxed">
+                kumpulan pertanyaan yang paling sering diajukan oleh peserta
+              </p>
+              <Button
+                asChild
+                className="w-full bg-[#1b8a86] hover:bg-[#156e6b] py-7 rounded-2xl font-bold text-lg"
+              >
+                <Link href="/Asset/FAQCEG.pdf">Buka FAQ</Link>
               </Button>
             </div>
           </div>
         </section>
 
         {/* ===== SECTION: FAQ ===== */}
-        <section
+        {/* <section
           id="faq"
           className="w-full flex flex-col gap-10 items-center pt-24"
         >
@@ -549,7 +593,7 @@ export default function HomepagePeserta() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
       </div>
 
       {/* ===== FOOTER: CONTACT & PARTNERS ===== */}
