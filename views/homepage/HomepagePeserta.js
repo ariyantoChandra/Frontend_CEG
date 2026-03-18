@@ -482,7 +482,7 @@ export default function HomepagePeserta() {
                 asChild
                 className="w-full bg-[#58a644] hover:bg-[#4a8c39] py-7 rounded-2xl font-bold text-lg"
               >
-                <Link href="/Asset/GUIDELINE.pdf">Download Booklet</Link>
+                <Link href="/Asset/GUIDELINE NEW.pdf">Download Booklet</Link>
               </Button>
             </div>
             <div className="bg-white/40 backdrop-blur-sm border border-white/60 rounded-[40px] p-8 shadow-2xl flex flex-col items-center group">
