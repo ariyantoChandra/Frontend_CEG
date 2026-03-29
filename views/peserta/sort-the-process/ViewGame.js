@@ -41,7 +41,7 @@ export default function ViewGame() {
   };
 
   const handleBack = () => {
-    clearGameStorage();
+    clearGameStorage(gameSessionId);
     router.push("/rally");
   };
 

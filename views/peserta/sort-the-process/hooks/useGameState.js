@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import * as API from "@/core/services/api";
+import { sortTheProcessQuestionStorageKey } from "../utils/storage";
 
 export const useGameState = (data, gameSessionId) => {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -8,16 +9,25 @@ export const useGameState = (data, gameSessionId) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
-    if (data?.questions && !selectedQuestion) {
-      const questions = data.questions;
-      const randomQuestion = questions.find(q => q.id === 1 || q.id === 2);
-      if (randomQuestion) {
-        setSelectedQuestion(randomQuestion);
-      } else if (questions.length > 0) {
-        setSelectedQuestion(questions[0]);
-      }
+    if (!data?.questions?.length || !gameSessionId || selectedQuestion) return;
+
+    const questions = data.questions;
+    const storageKey = sortTheProcessQuestionStorageKey(gameSessionId);
+    const raw = localStorage.getItem(storageKey);
+    const storedId = raw != null ? Number(raw) : NaN;
+    const fromStorage =
+      !Number.isNaN(storedId) ? questions.find((q) => q.id === storedId) : null;
+
+    if (fromStorage) {
+      setSelectedQuestion(fromStorage);
+      return;
     }
-  }, [data, selectedQuestion]);
+
+    const index = Math.floor(Math.random() * questions.length);
+    const picked = questions[index];
+    localStorage.setItem(storageKey, String(picked.id));
+    setSelectedQuestion(picked);
+  }, [data, gameSessionId, selectedQuestion]);
 
   useEffect(() => {
     if (selectedQuestion) {
