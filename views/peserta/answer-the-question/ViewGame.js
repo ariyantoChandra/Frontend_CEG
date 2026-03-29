@@ -283,7 +283,7 @@ export default function ViewGame() {
           {question.gambar_soal && (
             <div className="mt-4">
               <img
-                src={question.gambar_soal}
+                src={"https://api.cegubaya.com/" + question.gambar_soal}
                 alt="Gambar soal"
                 className="max-w-full rounded-lg"
               />
